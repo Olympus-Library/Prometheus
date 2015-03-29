@@ -33,7 +33,7 @@
 
 #pragma mark - Constants and Functions
 
-static NSTimeInterval DefaultAsyncTestTimeout = 8.0;
+static NSTimeInterval DefaultAsyncTestTimeout = 5.0;
 static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     return dispatch_time(DISPATCH_TIME_NOW, (int64_t) seconds * NSEC_PER_SEC);
 }
@@ -222,6 +222,34 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     XCTAssertNil(cache.cache[@"test"]);
     XCTAssertNil(cache.reads[@"test"]);
     XCTAssertEqual(0, cache.currentMemoryUsage);
+}
+
+#pragma mark Deadlock Tests
+
+- (void)testForDeadlock
+{
+    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:2560000];
+    PROCachedData *expected = [self randomCachedDataWithLifetime:10];
+    
+    [cache storeCachedData:expected forKey:@"test"];
+    
+    dispatch_queue_t queue = dispatch_queue_create("test.prometheus.memory", DISPATCH_QUEUE_CONCURRENT);
+    
+    int numFetches = 10000;
+    __block NSUInteger completedFetches = 0;
+    NSLock *fetchLock = [NSLock new];
+    dispatch_group_t group = dispatch_group_create();
+    for (int i = 0; i < numFetches; ++i) {
+        dispatch_group_async(group, queue, ^{
+            [cache cachedDataForKey:@"test"];
+            [fetchLock lock];
+            completedFetches++;
+            [fetchLock unlock];
+        });
+    }
+    
+    dispatch_group_wait(group, timeout(DefaultAsyncTestTimeout));
+    XCTAssertTrue(numFetches == completedFetches, @"didn't complete fetches, possibly due to deadlock.");
 }
 
 #pragma mark Helper
