@@ -28,7 +28,6 @@
 
 #import "PROMemoryCache.h"
 #import "PROCachedData.h"
-#import "PROCacheKey.h"
 #if TARGET_OS_IPHONE
 @import UIKit;
 #endif
@@ -125,7 +124,7 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
     });
 }
 
-// Note: potential deadlock if block targets the same queue
+// Note: potential deadlock if block targets the same queue, use carefully
 - (void)dispatchBarrierSync:(void (^)(PROMemoryCache *strong))block
 {
     __weak PROMemoryCache *weak = self;
@@ -139,7 +138,7 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
 
 #pragma mark Getting and Storing Cached Objects
 
-- (void)cachedDataForKey:(PROCacheKey *)key
+- (void)cachedDataForKey:(NSString *)key
               completion:(PROCacheReadWriteCompletion)completion
 {
     if (!key || !completion) {
@@ -167,7 +166,7 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
 }
 
 - (void)storeCachedData:(PROCachedData *)data
-                 forKey:(PROCacheKey *)key
+                 forKey:(NSString *)key
              completion:(PROCacheReadWriteCompletion)completion
 {
     if (!key || !data ||
@@ -194,7 +193,7 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
     }];
 }
 
-- (PROCachedData *)cachedDataForKey:(PROCacheKey *)key
+- (PROCachedData *)cachedDataForKey:(NSString *)key
 {
     if (!key) {
         return nil;
@@ -211,7 +210,7 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
     return data;
 }
 
-- (void)storeCachedData:(PROCachedData *)data forKey:(PROCacheKey *)key
+- (void)storeCachedData:(PROCachedData *)data forKey:(NSString *)key
 {
     if (!key || !data ||
         data.storagePolicy == PROCacheStoragePolicyNotAllowed) {
@@ -248,7 +247,7 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
     }];
 }
 
-- (void)removeCachedDataForKey:(PROCacheKey *)key
+- (void)removeCachedDataForKey:(NSString *)key
                     completion:(PROCacheReadWriteCompletion)completion
 {
     [self dispatchBarrierAsync:^(PROMemoryCache *strong) {
@@ -274,7 +273,7 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
     }];
 }
 
-- (void)removeCachedDataForKey:(PROCacheKey *)key
+- (void)removeCachedDataForKey:(NSString *)key
 {
     [self dispatchBarrierSync:^(PROMemoryCache *strong) {
         PROCachedData *data = strong.cache[key];

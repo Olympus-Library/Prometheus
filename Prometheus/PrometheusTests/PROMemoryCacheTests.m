@@ -29,7 +29,14 @@
 @import XCTest;
 #import "PROMemoryCache.h"
 #import "PROCachedData.h"
-#import "PROCacheKey.h"
+
+
+#pragma mark - Constants and Functions
+
+static NSTimeInterval DefaultAsyncTestTimeout = 8.0;
+static inline dispatch_time_t timeout(NSTimeInterval seconds) {
+    return dispatch_time(DISPATCH_TIME_NOW, (int64_t) seconds * NSEC_PER_SEC);
+}
 
 
 #pragma mark - PROMemoryCache Private Category Interface
@@ -56,40 +63,132 @@
 
 - (void)testDesignatedInitializer
 {
-    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:0];
-    XCTAssertEqual(0, cache.memoryCapacity);
+    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
+    XCTAssertEqual(1000, cache.memoryCapacity);
     XCTAssertEqual(0, cache.currentMemoryUsage);
     XCTAssertEqual(YES, cache.removesAllCachedDataOnMemoryWarning);
     XCTAssertEqual(YES, cache.removesAllCachedDataOnEnteringBackground);
 }
 
-#pragma mark Synchronous Tests
+#pragma mark Asynchronous Test
 
-- (void)testStoreCachedDataForKey
+- (void)testCachedDataForKeyCompletion
 {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
     PROCachedData *expected = [self randomCachedDataWithLifetime:10];
-    PROCacheKey *key = [PROCacheKey cacheKeyForKey:@"test"];
+    [cache storeCachedData:expected forKey:@"test"];
     
-    [cache storeCachedData:expected forKey:key];
+    __block PROCachedData *actual = nil;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    [cache cachedDataForKey:@"test" completion:^(NSString *key, PROCachedData *data) {
+        actual = data;
+        dispatch_semaphore_signal(semaphore);
+    }];
     
-    PROCachedData *actual = [cache.cache objectForKey:key];
-    XCTAssertEqual(expected.size, cache.currentMemoryUsage);
+    dispatch_semaphore_wait(semaphore, timeout(DefaultAsyncTestTimeout));
+    
     XCTAssertEqualObjects(expected, actual);
-    XCTAssertNotNil(cache.reads[key]);
+    XCTAssertNotNil(cache.reads[@"test"]);
 }
+
+- (void)testStoreCachedDataForKeyCompletion
+{
+    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
+    PROCachedData *expectedData = [self randomCachedDataWithLifetime:10];
+    NSString *expectedKey = @"test";
+    
+    __block NSString *actualKey = nil;
+    __block PROCachedData *actualData = nil;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    [cache storeCachedData:expectedData forKey:@"test" completion:^(NSString *key, PROCachedData *data) {
+        actualKey = key;
+        actualData = data;
+        dispatch_semaphore_signal(semaphore);
+    }];
+    
+    dispatch_semaphore_wait(semaphore, timeout(DefaultAsyncTestTimeout));
+    
+    XCTAssertNotNil(cache.reads[expectedKey]);
+    XCTAssertEqualObjects(expectedKey, actualKey);
+    XCTAssertEqualObjects(expectedData, actualData);
+    XCTAssertEqualObjects(expectedData, cache.cache[expectedKey]);
+}
+
+- (void)testRemoveAllCachedDataWithCompletion
+{
+    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:256000];
+    NSMutableArray *keys = [NSMutableArray new];
+    for (int i = 0; i < 1000; ++i) {
+        NSString *key = [NSString stringWithFormat:@"test%d", i];
+        PROCachedData *data = [self randomCachedDataWithLifetime:60];
+        [cache storeCachedData:data forKey:key];
+        [keys addObject:key];
+    }
+    
+    __block id<PROCaching> actualCache = nil;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    [cache removeAllCachedDataWithCompletion:^(id<PROCaching> cache, BOOL success) {
+        actualCache = cache;
+        dispatch_semaphore_signal(semaphore);
+    }];
+    
+    dispatch_semaphore_wait(semaphore, timeout(DefaultAsyncTestTimeout));
+    
+    XCTAssertEqual(cache, actualCache);
+    XCTAssertEqual(0, cache.currentMemoryUsage);
+    for (NSString *key in keys) {
+        XCTAssertNil(cache.cache[key]);
+        XCTAssertNil(cache.reads[key]);
+    }
+}
+
+- (void)testRemoveCachedDataForKeyCompletion
+{
+    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
+    PROCachedData *data = [self randomCachedDataWithLifetime:10];
+    [cache storeCachedData:data forKey:@"test"];
+    
+    __block NSString *actualKey = nil;
+    __block PROCachedData *actualData = nil;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    [cache removeCachedDataForKey:@"test" completion:^(NSString *key, PROCachedData *data) {
+        actualKey = key;
+        actualData = data;
+        dispatch_semaphore_signal(semaphore);
+    }];
+    
+    dispatch_semaphore_wait(semaphore, timeout(DefaultAsyncTestTimeout));
+    
+    XCTAssertNil(actualData);
+    XCTAssertEqualObjects(@"test", actualKey);
+    XCTAssertEqual(0, cache.currentMemoryUsage);
+}
+
+#pragma mark Synchronous Tests
 
 - (void)testCachedDataForKey
 {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
     PROCachedData *expected = [self randomCachedDataWithLifetime:10];
-    PROCacheKey *key = [PROCacheKey cacheKeyForKey:@"test"];
-    cache.cache[key] = expected;
+    [cache storeCachedData:expected forKey:@"test"];
     
-    PROCachedData *actual = [cache cachedDataForKey:key];
+    PROCachedData *actual = [cache cachedDataForKey:@"test"];
     
     XCTAssertEqualObjects(expected, actual);
-    XCTAssertNotNil(cache.reads[key]);
+    XCTAssertNotNil(cache.reads[@"test"]);
+}
+
+- (void)testStoreCachedDataForKey
+{
+    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
+    PROCachedData *expected = [self randomCachedDataWithLifetime:10];
+    
+    [cache storeCachedData:expected forKey:@"test"];
+    
+    PROCachedData *actual = [cache.cache objectForKey:@"test"];
+    XCTAssertEqual(expected.size, cache.currentMemoryUsage);
+    XCTAssertEqualObjects(expected, actual);
+    XCTAssertNotNil(cache.reads[@"test"]);
 }
 
 - (void)testRemoveAllCachedData
@@ -97,17 +196,16 @@
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:256000];
     NSMutableArray *keys = [NSMutableArray new];
     for (int i = 0; i < 1000; ++i) {
-        PROCacheKey *key = [PROCacheKey cacheKeyForKey:[NSString stringWithFormat:@"test%d", i]];
+        NSString *key = [NSString stringWithFormat:@"test%d", i];
         PROCachedData *data = [self randomCachedDataWithLifetime:60];
-        cache.cache[key] = data;
-        cache.reads[key] = [NSDate date];
+        [cache storeCachedData:data forKey:key];
         [keys addObject:key];
     }
     
     [cache removeAllCachedData];
     
     XCTAssertEqual(0, cache.currentMemoryUsage);
-    for (PROCacheKey *key in keys) {
+    for (NSString *key in keys) {
         XCTAssertNil(cache.cache[key]);
         XCTAssertNil(cache.reads[key]);
     }
@@ -116,9 +214,14 @@
 - (void)testRemoveCachedDataForKey
 {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
+    PROCachedData *expected = [self randomCachedDataWithLifetime:10];
+    [cache storeCachedData:expected forKey:@"test"];
     
+    [cache removeCachedDataForKey:@"test"];
     
-    
+    XCTAssertNil(cache.cache[@"test"]);
+    XCTAssertNil(cache.reads[@"test"]);
+    XCTAssertEqual(0, cache.currentMemoryUsage);
 }
 
 #pragma mark Helper

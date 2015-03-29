@@ -65,7 +65,20 @@
  */
 - (instancetype)initWithMemoryCapacity:(NSUInteger)memoryCapacity
                           diskCapacity:(NSUInteger)diskCapacity
-                              diskPath:(NSString *)path;
+                              diskPath:(NSString *)path
+                                NS_DESIGNATED_INITIALIZER;
+
+/**
+ Initializes a PROCache object with the specified values.
+ 
+ @param     memoryCache
+            The memory cache to use.
+ @param     diskCache
+            The disk cache to use.
+ */
+- (instancetype)initWithMemoryCache:(id<PROMemoryCaching>)memoryCache
+                          diskCache:(id<PRODiskCaching>)diskCache
+                            NS_DESIGNATED_INITIALIZER;
 
 // -----
 // @name Properties

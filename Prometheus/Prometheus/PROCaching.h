@@ -31,7 +31,6 @@
 
 #pragma mark - Forward Declarations
 
-@class PROCacheKey;
 @class PROCachedData;
 @protocol PROCaching;
 
@@ -44,7 +43,7 @@ typedef void (^PROCacheOperationCompletion)(id<PROCaching> cache, BOOL success);
 
 /**
  */
-typedef void (^PROCacheReadWriteCompletion)(PROCacheKey *key, PROCachedData *data);
+typedef void (^PROCacheReadWriteCompletion)(NSString *key, PROCachedData *data);
 
 
 #pragma mark - PROCaching Protocol
@@ -68,7 +67,7 @@ typedef void (^PROCacheReadWriteCompletion)(PROCacheKey *key, PROCachedData *dat
             The completion handler to be executed when the desired cached data
             is available.
  */
-- (void)cachedDataForKey:(PROCacheKey *)key
+- (void)cachedDataForKey:(NSString *)key
               completion:(PROCacheReadWriteCompletion)completion;
 
 /**
@@ -83,16 +82,17 @@ typedef void (^PROCacheReadWriteCompletion)(PROCacheKey *key, PROCachedData *dat
             has been stored in the cache.
  */
 - (void)storeCachedData:(PROCachedData *)data
-                 forKey:(PROCacheKey *)key
+                 forKey:(NSString *)key
              completion:(PROCacheReadWriteCompletion)completion;
 
 /**
  Synchronously returns the cached data in the cache for the specified cache key.
+ 
  @param     key
             The cache key whose data is desired.
  @return    The cached data for key, or nil if no data has been cached.
  */
-- (PROCachedData *)cachedDataForKey:(PROCacheKey *)key;
+- (PROCachedData *)cachedDataForKey:(NSString *)key;
 
 /**
  Synchronously stores cached data for a specified key.
@@ -102,7 +102,7 @@ typedef void (^PROCacheReadWriteCompletion)(PROCacheKey *key, PROCachedData *dat
  @param     key
             The cache key for which the cached data is being stored.
  */
-- (void)storeCachedData:(PROCachedData *)data forKey:(PROCacheKey *)key;
+- (void)storeCachedData:(PROCachedData *)data forKey:(NSString *)key;
 
 // -----
 // @name Removing Cached Objects
@@ -127,7 +127,7 @@ typedef void (^PROCacheReadWriteCompletion)(PROCacheKey *key, PROCachedData *dat
  @param     completion
  
  */
-- (void)removeCachedDataForKey:(PROCacheKey *)key
+- (void)removeCachedDataForKey:(NSString *)key
                     completion:(PROCacheReadWriteCompletion)completion;
 
 /**
@@ -146,6 +146,6 @@ typedef void (^PROCacheReadWriteCompletion)(PROCacheKey *key, PROCachedData *dat
             The cache key whose cache data should be removed. If there is no
             corresponding cached data, no action is taken.
  */
-- (void)removeCachedDataForKey:(PROCacheKey *)key;
+- (void)removeCachedDataForKey:(NSString *)key;
 
 @end

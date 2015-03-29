@@ -57,28 +57,37 @@
     return self;
 }
 
+- (instancetype)initWithMemoryCache:(id<PROMemoryCaching>)memoryCache
+                          diskCache:(id<PRODiskCaching>)diskCache
+{
+    if (self = [super init]) {
+        
+    }
+    return self;
+}
+
 
 #pragma mark Getting and Storing Cached Objects
 
-- (void)cachedDataForKey:(PROCacheKey *)key
+- (void)cachedDataForKey:(NSString *)key
               completion:(PROCacheReadWriteCompletion)completion
 {
     
 }
 
 - (void)storeCachedData:(PROCachedData *)data
-                 forKey:(PROCacheKey *)key
+                 forKey:(NSString *)key
              completion:(PROCacheReadWriteCompletion)completion
 {
     
 }
 
-- (PROCachedData *)cachedDataForKey:(PROCacheKey *)key
+- (PROCachedData *)cachedDataForKey:(NSString *)key
 {
     return nil;
 }
 
-- (void)storeCachedData:(PROCachedData *)data forKey:(PROCacheKey *)key
+- (void)storeCachedData:(PROCachedData *)data forKey:(NSString *)key
 {
     
 }
@@ -90,7 +99,7 @@
     
 }
 
-- (void)removeCachedDataForKey:(PROCacheKey *)key
+- (void)removeCachedDataForKey:(NSString *)key
                     completion:(PROCacheReadWriteCompletion)completion
 {
     
@@ -101,7 +110,7 @@
     
 }
 
-- (void)removeCachedDataForKey:(PROCacheKey *)key
+- (void)removeCachedDataForKey:(NSString *)key
 {
     
 }
