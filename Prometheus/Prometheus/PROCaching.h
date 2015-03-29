@@ -67,6 +67,7 @@ typedef NS_ENUM(NSUInteger, PROCacheEvictionDecision) {
 
 #pragma mark - PROCaching Protocol
 
+NS_PROTOCOL_REQUIRES_EXPLICIT_IMPLEMENTATION
 @protocol PROCaching <NSObject>
 
 @required

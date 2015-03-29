@@ -33,6 +33,23 @@
 #import "PROCacheDelegate.h"
 
 
+#pragma mark - Constants
+
+/**
+ The path of the shared cache's on-disk cache.
+ */
+extern NSString * const PROCacheSharedDiskPath;
+
+/**
+ The capacity of the shared cache's on-disk cache.
+ */
+extern const NSUInteger PROCacheSharedDiskCapacity;
+
+/**
+ The capacity of the shared cache's in-memory cache.
+ */
+extern const NSUInteger PROCacheSharedMemoryCapacity;
+
 #pragma mark - PROCache Interface
 
 /**
@@ -45,7 +62,17 @@
 @interface PROCache : NSObject <PROCaching, PRODiskCaching, PROMemoryCaching>
 
 // -----
-// @name Creating an Prometheus Cache
+// @name Getting the Shared Cache
+// -----
+
+#pragma mark Getting the Shared Cache
+
+/**
+ */
++ (PROCache *)sharedCache;
+
+// -----
+// @name Creating a Cache
 // -----
 
 #pragma mark Creating an Prometheus Cache
@@ -65,7 +92,7 @@
  */
 - (instancetype)initWithMemoryCapacity:(NSUInteger)memoryCapacity
                           diskCapacity:(NSUInteger)diskCapacity
-                              diskPath:(NSString *)path
+                              diskPath:(NSString *)diskPath
                                 NS_DESIGNATED_INITIALIZER;
 
 /**
@@ -87,8 +114,19 @@
 #pragma mark Properties
 
 /**
+ The receiver's delegate.
  */
-@property (NS_NONATOMIC_IOSONLY, weak) id<PROCacheDelegate> delegate;
+@property (weak, NS_NONATOMIC_IOSONLY) id<PROCacheDelegate> delegate;
+
+/**
+ The receiver's on-disk cache.
+ */
+@property (readonly, NS_NONATOMIC_IOSONLY) id<PRODiskCaching> diskCache;
+
+/**
+ The receiver's in-memory cache.
+ */
+@property (readonly, NS_NONATOMIC_IOSONLY) id<PROMemoryCaching> memoryCache;
 
 /**
  The capacity of the receiver's on-disk cache, in bytes.
@@ -99,6 +137,11 @@
  The current size of the receiver's on-disk cache, in bytes.
  */
 @property (readonly) NSUInteger currentDiskUsage;
+
+/**
+ The path of the receiver's on-disk cache.
+ */
+@property (readonly, copy) NSString *diskPath;
 
 /**
  The capacity of the receiver's in-memory cache, in bytes.
@@ -113,17 +156,13 @@
 /**
  Indicates whether the cache removes all of its cached data when it receives
  a memory warning.
- 
- The default is YES.
  */
-@property (assign) BOOL removesAllCachedDataOnMemoryWarning;
+@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnMemoryWarning;
 
 /**
  Indicates whether the cache remove all of its cached data when it enters the
  background.
- 
- The default is YES.
  */
-@property (assign) BOOL removesAllCachedDataOnEnteringBackground;
+@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnEnteringBackground;
 
 @end

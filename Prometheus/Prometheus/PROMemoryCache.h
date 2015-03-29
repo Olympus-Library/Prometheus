@@ -59,7 +59,7 @@
 
 /**
  */
-@property (NS_NONATOMIC_IOSONLY, weak) id<PROMemoryCacheDelegate> delegate;
+@property (weak, NS_NONATOMIC_IOSONLY) id<PROMemoryCacheDelegate> delegate;
 
 /**
  The capacity of the receiver's in-memory cache, in bytes.
@@ -77,7 +77,7 @@
  
  The default is YES.
  */
-@property (assign) BOOL removesAllCachedDataOnMemoryWarning;
+@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnMemoryWarning;
 
 /**
  Indicates whether the cache remove all of its cached data when it enters the
@@ -85,6 +85,6 @@
  
  The default is YES.
  */
-@property (assign) BOOL removesAllCachedDataOnEnteringBackground;
+@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnEnteringBackground;
 
 @end

@@ -31,12 +31,16 @@
 #import "PROMemoryCache.h"
 
 
+#pragma mark - Constants
+
+NSString * const PROCacheSharedDiskPath         = @""; // TODO
+const NSUInteger PROCacheSharedDiskCapacity     = 16000000; // 16MiB
+const NSUInteger PROCacheSharedMemoryCapacity   = 4000000;  // 4MiB
+
+
 #pragma mark - PROCache Class Extension
 
 @interface PROCache ()
-
-@property (readonly) PRODiskCache    *diskCache;
-@property (readonly) PROMemoryCache  *memoryCache;
 
 @end
 
@@ -45,14 +49,31 @@
 
 @implementation PROCache
 
-#pragma mark Creating an Prometheus Cache
+#pragma mark Getting the Shared Cache
+
++ (PROCache *)sharedCache
+{
+    static PROCache *sharedCache = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedCache = [[PROCache alloc]initWithMemoryCapacity:PROCacheSharedMemoryCapacity
+                                                 diskCapacity:PROCacheSharedDiskCapacity
+                                                     diskPath:PROCacheSharedDiskPath];
+    });
+    return sharedCache;
+}
+
+
+#pragma mark Creating a Cache
 
 - (instancetype)initWithMemoryCapacity:(NSUInteger)memoryCapacity
                           diskCapacity:(NSUInteger)diskCapacity
-                              diskPath:(NSString *)path
+                              diskPath:(NSString *)diskPath
 {
     if (self = [super init]) {
-        
+        _memoryCache    = [[PROMemoryCache alloc]initWithMemoryCapacity:memoryCapacity];
+        _diskCache      = [[PRODiskCache alloc]initWithDiskCapacity:diskCapacity
+                                                           diskPath:diskPath];
     }
     return self;
 }
@@ -61,7 +82,8 @@
                           diskCache:(id<PRODiskCaching>)diskCache
 {
     if (self = [super init]) {
-        
+        _diskCache      = diskCache;
+        _memoryCache    = memoryCache;
     }
     return self;
 }
@@ -113,6 +135,40 @@
 - (void)removeCachedDataForKey:(NSString *)key
 {
     
+}
+
+#pragma mark Setters
+
+- (void)setRemovesAllCachedDataOnMemoryWarning:(BOOL)removesAllCachedDataOnMemoryWarning
+{
+    self.memoryCache.removesAllCachedDataOnMemoryWarning = removesAllCachedDataOnMemoryWarning;
+}
+
+#pragma mark Getters
+
+- (NSUInteger)currentMemoryUsage
+{
+    return self.memoryCache.currentMemoryUsage;
+}
+
+- (NSUInteger)memoryCapacity
+{
+    return self.memoryCache.memoryCapacity;
+}
+
+- (NSUInteger)currentDiskUsage
+{
+    return self.diskCache.currentDiskUsage;
+}
+
+- (NSUInteger)diskCapacity
+{
+    return self.diskCache.diskCapacity;
+}
+
+- (NSString *)diskPath
+{
+    return self.diskCache.diskPath;
 }
 
 @end

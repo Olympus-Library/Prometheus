@@ -153,7 +153,7 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
 /**
  The receiver's cache storage policy.
  */
-@property (assign) PROCacheStoragePolicy storagePolicy;
+@property (assign, NS_NONATOMIC_IOSONLY) PROCacheStoragePolicy storagePolicy;
 
 /**
  The receiver's size, in bytes.
@@ -168,16 +168,16 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
 /**
  The receiver's cached data.
  */
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSData *data;
+@property (readonly, copy) NSData *data;
 
 /**
  The receiver's expiration date.
  */
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSDate *expiration;
+@property (readonly, copy) NSDate *expiration;
 
 /**
  The creation date of the receiver's data.
  */
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSDate *timestamp;
+@property (readonly, copy) NSDate *timestamp;
 
 @end

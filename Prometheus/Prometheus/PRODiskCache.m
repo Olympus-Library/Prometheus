@@ -33,4 +33,63 @@
 
 @implementation PRODiskCache
 
+- (instancetype)initWithDiskCapacity:(NSUInteger)diskCapacity
+                            diskPath:(NSString *)diskPath
+{
+    if (self = [super init]) {
+        _diskPath = diskPath;
+        _diskCapacity = diskCapacity;
+    }
+    return self;
+}
+
+#pragma mark Getting and Storing Cached Objects
+
+- (void)cachedDataForKey:(NSString *)key
+              completion:(PROCacheReadWriteCompletion)completion
+{
+    
+}
+
+- (void)storeCachedData:(PROCachedData *)data
+                 forKey:(NSString *)key
+             completion:(PROCacheReadWriteCompletion)completion
+{
+    
+}
+
+- (PROCachedData *)cachedDataForKey:(NSString *)key
+{
+    return nil;
+}
+
+- (void)storeCachedData:(PROCachedData *)data forKey:(NSString *)key
+{
+    
+}
+
+#pragma mark Removing Cached Objects
+
+- (void)removeAllCachedDataWithCompletion:(PROCacheOperationCompletion)completion
+{
+    
+}
+
+- (void)removeCachedDataForKey:(NSString *)key
+                    completion:(PROCacheReadWriteCompletion)completion
+{
+    
+}
+
+
+- (void)removeAllCachedData
+{
+    
+}
+
+- (void)removeCachedDataForKey:(NSString *)key
+{
+    
+}
+
 @end

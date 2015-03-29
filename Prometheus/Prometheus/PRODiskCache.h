@@ -27,12 +27,30 @@
 #pragma mark - Imports
 
 @import Foundation;
+#import "PROCaching.h"
+#import "PRODiskCaching.h"
 #import "PRODiskCacheDelegate.h"
 
 
 #pragma mark - PRODiskCache Interface
 
-@interface PRODiskCache : NSObject
+/**
+ */
+@interface PRODiskCache : NSObject <PROCaching, PRODiskCaching>
+
+- (instancetype)init NS_UNAVAILABLE;
+
+// -----
+// @name Creating a Disk Cache
+// -----
+
+#pragma mark Creating a Disk Cache
+
+/**
+ */
+- (instancetype)initWithDiskCapacity:(NSUInteger)diskCapacity
+                            diskPath:(NSString *)diskPath
+                            NS_DESIGNATED_INITIALIZER;
 
 // -----
 // @name Properties
@@ -42,6 +60,21 @@
 
 /**
  */
-@property (NS_NONATOMIC_IOSONLY, weak) id<PRODiskCacheDelegate> delegate;
+@property (weak, NS_NONATOMIC_IOSONLY) id<PRODiskCacheDelegate> delegate;
+
+/**
+ The capacity of the receiver's on-disk cache, in bytes.
+ */
+@property (readonly) NSUInteger diskCapacity;
+
+/**
+ The current size of the receiver's on-disk cache, in bytes.
+ */
+@property (readonly) NSUInteger currentDiskUsage;
+
+/**
+ The path of the receiver's on-disk cache.
+ */
+@property (readonly, copy) NSString *diskPath;
 
 @end

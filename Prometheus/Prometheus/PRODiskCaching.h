@@ -32,6 +32,7 @@
 
 #pragma mark - PRODiskCaching Protocol
 
+NS_PROTOCOL_REQUIRES_EXPLICIT_IMPLEMENTATION
 @protocol PRODiskCaching <NSObject, PROCaching>
 
 // -----
@@ -49,5 +50,10 @@
  The current size of the receiver's on-disk cache, in bytes.
  */
 @property (readonly) NSUInteger currentDiskUsage;
+
+/**
+ The path of the receiver's on-disk cache.
+ */
+@property (readonly, copy) NSString *diskPath;
 
 @end
