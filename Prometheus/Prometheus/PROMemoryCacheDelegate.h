@@ -1,5 +1,5 @@
 //
-//  PRODiskCache.h
+//  PROMemoryCacheDelegate.h
 //  Prometheus
 //
 //  Copyright (c) 2015 Comyar Zaheri. All rights reserved.
@@ -27,21 +27,27 @@
 #pragma mark - Imports
 
 @import Foundation;
-#import "PRODiskCacheDelegate.h"
+#import "PROCaching.h"
 
 
-#pragma mark - PRODiskCache Interface
+#pragma mark - Forward Declarations
 
-@interface PRODiskCache : NSObject
+@class PROCachedData;
 
-// -----
-// @name Properties
-// -----
 
-#pragma mark Properties
+#pragma mark - PROMemoryCacheDelegate Protocol
+
+@protocol PROMemoryCacheDelegate <NSObject>
+
+@optional
 
 /**
  */
-@property (NS_NONATOMIC_IOSONLY, weak) id<PRODiskCacheDelegate> delegate;
+- (PROCacheEvictionDecision)cache:(id<PROCaching>)cache
+        shouldEvictDataFromMemory:(PROCachedData *)data;
+
+/**
+ */
+- (void)cache:(id<PROCaching>)cache didEvictDataFromMemory:(PROCachedData *)data;
 
 @end

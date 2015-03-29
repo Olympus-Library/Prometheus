@@ -45,22 +45,11 @@ static const NSUInteger HashPrime           = 17;
 {
     return [self initWithData:data
                      lifetime:lifetime
-                storagePolicy:PROCacheStoragePolicyAllowed];
+                timestamp:[NSDate date]];
 }
 
 - (instancetype)initWithData:(NSData *)data
                     lifetime:(NSTimeInterval)lifetime
-               storagePolicy:(PROCacheStoragePolicy)storagePolicy
-{
-    return [self initWithData:data
-                     lifetime:lifetime
-                storagePolicy:storagePolicy
-                    timestamp:[NSDate date]];
-}
-
-- (instancetype)initWithData:(NSData *)data
-                    lifetime:(NSTimeInterval)lifetime
-               storagePolicy:(PROCacheStoragePolicy)storagePolicy
                    timestamp:(NSDate *)timestamp
 {
     if (self = [super init]) {
@@ -71,7 +60,6 @@ static const NSUInteger HashPrime           = 17;
         }
         _data           = [data copy];
         _lifetime       = lifetime;
-        _storagePolicy  = storagePolicy;
         _timestamp      = [timestamp copy];
         if (_lifetime > 0) {
             _expiration = [_timestamp dateByAddingTimeInterval:_lifetime];
@@ -79,6 +67,7 @@ static const NSUInteger HashPrime           = 17;
             _expiration = nil;
         }
         _size = [PROCachedData sizeWithData:_data];
+        self.storagePolicy  = PROCacheStoragePolicyAllowed;
     }
     return self;
 }
@@ -90,21 +79,10 @@ static const NSUInteger HashPrime           = 17;
 
 + (PROCachedData *)cachedDataWithData:(NSData *)data
                             lifetime:(NSTimeInterval)lifetime
-                       storagePolicy:(PROCacheStoragePolicy)storagePolicy
-{
-    return [[PROCachedData alloc]initWithData:data
-                                    lifetime:lifetime
-                               storagePolicy:storagePolicy];
-}
-
-+ (PROCachedData *)cachedDataWithData:(NSData *)data
-                            lifetime:(NSTimeInterval)lifetime
-                       storagePolicy:(PROCacheStoragePolicy)storagePolicy
                            timestamp:(NSDate *)timestamp
 {
     return [[PROCachedData alloc]initWithData:data
                                     lifetime:lifetime
-                               storagePolicy:storagePolicy
                                    timestamp:timestamp];
 }
 
@@ -173,10 +151,11 @@ static const NSUInteger HashPrime           = 17;
 
 - (instancetype)copyWithZone:(NSZone *)zone
 {
-    return [PROCachedData cachedDataWithData:self.data
-                                   lifetime:self.lifetime
-                              storagePolicy:self.storagePolicy
-                                   timestamp:self.timestamp];
+    PROCachedData *copy = [PROCachedData cachedDataWithData:self.data
+                                                   lifetime:self.lifetime
+                                                  timestamp:self.timestamp];
+    copy.storagePolicy = self.storagePolicy;
+    return copy;
 }
 
 #pragma mark NSSecureCoding

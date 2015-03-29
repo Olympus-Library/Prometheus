@@ -95,36 +95,18 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
 /**
  Initializes a PROCachedData object.
  
- The timestamp is set to the current time.
- 
- @param     data
- The data to cache.
- @param     lifetime
- The time interval the data is considered valid.
- @param     storagePolicy
- The storage policy for the cached data.
- @return    The PROCachedData object, initialized using the given data.
- */
-- (instancetype)initWithData:(NSData *)data
-                    lifetime:(NSTimeInterval)lifetime
-               storagePolicy:(PROCacheStoragePolicy)storagePolicy;
-
-/**
- Initializes a PROCachedData object.
+ The cache storage policy is set to the default, CZCacheStoragePolicyAllowed.
  
  @param     data
             The data to cache.
  @param     lifetime
             The time interval the data is considered valid.
- @param     storagePolicy
-            The storage policy for the cached data.
  @param     timestamp
             The creation date of the data.
  @return    The PROCachedData object, initialized using the given data.
  */
 - (instancetype)initWithData:(NSData *)data
                     lifetime:(NSTimeInterval)lifetime
-               storagePolicy:(PROCacheStoragePolicy)storagePolicy
                    timestamp:(NSDate *)timestamp
                     NS_DESIGNATED_INITIALIZER;
 
@@ -147,38 +129,19 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
 /**
  Creates and returns a PROCachedData object.
  
- The timestamp is set to the current time.
- 
- @param     data
-            The data to cache.
- @param     lifetime
-            The time interval the data is considered valid.
- @param     storagePolicy
-            The storage policy for the cached data.
- @return    The newly created PROCachedData object.
- */
-+ (PROCachedData *)cachedDataWithData:(NSData *)data
-                            lifetime:(NSTimeInterval)lifetime
-                       storagePolicy:(PROCacheStoragePolicy)storagePolicy;
-
-/**
- Creates and returns a PROCachedData object.
- 
- The timestamp is set to the current time.
+ The cache storage policy is set to the default, CZCacheStoragePolicyAllowed,
+ and the timestamp is set to the current time.
  
  @param     data
  The data to cache.
  @param     lifetime
             The time interval the data is considered valid.
- @param     storagePolicy
-            The storage policy for the cached data.
  @param     timestamp
             The creation date of the data.
  @return    The newly created PROCachedData object.
  */
 + (PROCachedData *)cachedDataWithData:(NSData *)data
                             lifetime:(NSTimeInterval)lifetime
-                       storagePolicy:(PROCacheStoragePolicy)storagePolicy
                            timestamp:(NSDate *)timestamp;
 
 // -----
@@ -186,6 +149,11 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
 // -----
 
 #pragma mark Properties
+
+/**
+ The receiver's cache storage policy.
+ */
+@property (assign) PROCacheStoragePolicy storagePolicy;
 
 /**
  The receiver's size, in bytes.
@@ -196,11 +164,6 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
  The receiver's lifetime, in seconds.
  */
 @property (readonly) NSTimeInterval lifetime;
-
-/**
- The receiver's cache storage policy.
- */
-@property (readonly) PROCacheStoragePolicy storagePolicy;
 
 /**
  The receiver's cached data.

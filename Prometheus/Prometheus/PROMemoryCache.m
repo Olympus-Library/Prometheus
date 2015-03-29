@@ -171,6 +171,9 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
 {
     if (!key || !data ||
         data.storagePolicy == PROCacheStoragePolicyNotAllowed) {
+        [self dispatchAsync:^(PROMemoryCache *strong) {
+            completion(key, nil);
+        }];
         return;
     }
     

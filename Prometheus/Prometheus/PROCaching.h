@@ -45,6 +45,25 @@ typedef void (^PROCacheOperationCompletion)(id<PROCaching> cache, BOOL success);
  */
 typedef void (^PROCacheReadWriteCompletion)(NSString *key, PROCachedData *data);
 
+/**
+ These constants specify how
+ */
+typedef NS_ENUM(NSUInteger, PROCacheEvictionDecision) {
+    
+    /**
+     Specifies that the cache's decision to evict the cached data should not be 
+     overridden.
+     */
+    PROCacheEvictionDecisionAffirm          = 0,
+    
+    /**
+     Specifies that the cache's decision to evict should be deferred by the 
+     lifetime of the cached data. In effect, this extends the expiration of the
+     cached data by the duration of its lifetime.
+     */
+    PROCacheEvictionDecisionDeferByLifetime = 1
+};
+
 
 #pragma mark - PROCaching Protocol
 
@@ -59,7 +78,7 @@ typedef void (^PROCacheReadWriteCompletion)(NSString *key, PROCachedData *data);
 #pragma mark Getting and Storing Cached Objects
 
 /**
- Asynchronously teturns the cached data in the cache for the specified cache key.
+ Asynchronously returns the cached data in the cache for the specified cache key.
  
  @param     key
             The cache key whose data is desired.

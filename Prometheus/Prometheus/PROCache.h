@@ -88,7 +88,7 @@
 
 /**
  */
-@property (weak) id<PROCacheDelegate> delegate;
+@property (NS_NONATOMIC_IOSONLY, weak) id<PROCacheDelegate> delegate;
 
 /**
  The capacity of the receiver's on-disk cache, in bytes.

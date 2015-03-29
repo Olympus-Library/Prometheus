@@ -45,8 +45,7 @@
 {
     NSMutableData *data = [NSMutableData dataWithData:[@"data" dataUsingEncoding:NSUTF8StringEncoding]];
     PROCachedData *cachedData = [[PROCachedData alloc]initWithData:data
-                                                        lifetime:0
-                                                   storagePolicy:PROCacheStoragePolicyAllowed];
+                                                        lifetime:0];
     [data appendData:[@"modification" dataUsingEncoding:NSUTF8StringEncoding]];
     XCTAssertNotEqual(cachedData.data, data);
     XCTAssertNotEqualObjects(cachedData.data, data);
@@ -75,12 +74,10 @@
 {
     NSDate *date = [NSDate date];
     PROCachedData *firstData = [[PROCachedData alloc]initWithData:[@"data" dataUsingEncoding:NSUTF8StringEncoding]
-                                                       lifetime:0
-                                                    storagePolicy:PROCacheStoragePolicyAllowed
+                                                         lifetime:0
                                                         timestamp:date];
     PROCachedData *secondData = [[PROCachedData alloc]initWithData:[@"data" dataUsingEncoding:NSUTF8StringEncoding]
                                                           lifetime:0
-                                                     storagePolicy:PROCacheStoragePolicyAllowed
                                                          timestamp:date];
     XCTAssertEqualObjects(firstData, secondData);
     XCTAssertEqual([firstData hash], [secondData hash]);

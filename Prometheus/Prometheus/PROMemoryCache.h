@@ -29,6 +29,7 @@
 @import Foundation;
 #import "PROCaching.h"
 #import "PROMemoryCaching.h"
+#import "PROMemoryCacheDelegate.h"
 
 
 #pragma mark - PROMemoryCache Interface
@@ -55,6 +56,10 @@
 // -----
 
 #pragma mark Properties
+
+/**
+ */
+@property (NS_NONATOMIC_IOSONLY, weak) id<PROMemoryCacheDelegate> delegate;
 
 /**
  The capacity of the receiver's in-memory cache, in bytes.

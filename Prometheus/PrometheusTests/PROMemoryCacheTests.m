@@ -114,6 +114,31 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     XCTAssertEqualObjects(expectedData, cache.cache[expectedKey]);
 }
 
+- (void)testStoreCachedDataForKeyCompletionStoragePolicy
+{
+    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
+    PROCachedData *expectedData = [self randomCachedDataWithLifetime:10];
+    expectedData.storagePolicy = PROCacheStoragePolicyNotAllowed;
+    NSString *expectedKey = @"test";
+    
+    __block NSString *actualKey = nil;
+    __block PROCachedData *actualData = nil;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    [cache storeCachedData:expectedData forKey:@"test" completion:^(NSString *key, PROCachedData *data) {
+        actualKey = key;
+        actualData = data;
+        dispatch_semaphore_signal(semaphore);
+    }];
+    
+    dispatch_semaphore_wait(semaphore, timeout(DefaultAsyncTestTimeout));
+    
+    XCTAssertNil(actualData);
+    XCTAssertNil(cache.cache[expectedKey]);
+    XCTAssertNil(cache.reads[expectedKey]);
+    XCTAssertEqualObjects(expectedKey, actualKey);
+    XCTAssertEqual(0, cache.currentMemoryUsage);
+}
+
 - (void)testRemoveAllCachedDataWithCompletion
 {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:256000];
@@ -189,6 +214,20 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     XCTAssertEqual(expected.size, cache.currentMemoryUsage);
     XCTAssertEqualObjects(expected, actual);
     XCTAssertNotNil(cache.reads[@"test"]);
+}
+
+- (void)testStoreCachedDataForKeyStoragePolicy
+{
+    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
+    PROCachedData *expected = [self randomCachedDataWithLifetime:10];
+    expected.storagePolicy = PROCacheStoragePolicyNotAllowed;
+    
+    [cache storeCachedData:expected forKey:@"test"];
+    
+    PROCachedData *actual = [cache.cache objectForKey:@"test"];
+    XCTAssertEqual(0, cache.currentMemoryUsage);
+    XCTAssertNil(cache.reads[@"test"]);
+    XCTAssertNil(actual);
 }
 
 - (void)testRemoveAllCachedData

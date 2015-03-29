@@ -54,6 +54,8 @@
 		DDC68D0F1AC7478A005627D6 /* PROCachedDataTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PROCachedDataTest.m; sourceTree = "<group>"; };
 		DDC68D151AC74F8D005627D6 /* PROCacheDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PROCacheDelegate.h; sourceTree = "<group>"; };
 		DDEB44541AC7F1C700791ADB /* PROMemoryCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PROMemoryCacheTests.m; sourceTree = "<group>"; };
+		DDEB44561AC815F500791ADB /* PROMemoryCacheDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PROMemoryCacheDelegate.h; sourceTree = "<group>"; };
+		DDEB44571AC8163600791ADB /* PRODiskCacheDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PRODiskCacheDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +154,8 @@
 				DDC68CF41AC74778005627D6 /* PRODiskCaching.h */,
 				DDC68CF51AC74778005627D6 /* PROMemoryCaching.h */,
 				DDC68D151AC74F8D005627D6 /* PROCacheDelegate.h */,
+				DDEB44571AC8163600791ADB /* PRODiskCacheDelegate.h */,
+				DDEB44561AC815F500791ADB /* PROMemoryCacheDelegate.h */,
 			);
 			name = Protocols;
 			sourceTree = "<group>";

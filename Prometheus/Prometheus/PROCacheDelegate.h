@@ -28,6 +28,8 @@
 
 @import Foundation;
 #import "PROCaching.h"
+#import "PRODiskCacheDelegate.h"
+#import "PROMemoryCacheDelegate.h"
 
 
 #pragma mark - Forward Declarations
@@ -37,12 +39,19 @@
 
 #pragma mark - PROCacheDelegate Protocol
 
-@protocol PROCacheDelegate <NSObject>
+@protocol PROCacheDelegate <NSObject, PRODiskCacheDelegate, PROMemoryCacheDelegate>
 
-@required
+@optional
 
 /**
+ Determines whether the cache should use the cached data on disk for the given
+ version.
  */
-- (void)cache:(id<PROCaching>)cache willEvictData:(PROCachedData *)data;
+- (BOOL)cache:(id<PROCaching>)cache shouldUseDiskCacheVersion:(NSString *)version;
+
+/**
+ Migrates the disk cache from the given version.
+ */
+- (void)cache:(id<PROCaching>)cache migrateFromDiskCacheVersion:(NSString *)version;
 
 @end
