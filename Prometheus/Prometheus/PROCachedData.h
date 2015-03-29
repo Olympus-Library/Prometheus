@@ -39,24 +39,24 @@ extern NSTimeInterval PROCachedDataMaxExpiration;
 /**
  These constants specify the caching strategy used by a PROCachedData object.
  */
-typedef NS_ENUM(NSUInteger, CZCacheStoragePolicy) {
+typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
     
     /**
-     Specifies that storage in a CZAsyncCache is allowed without restriction.
+     Specifies that storage in a cache is allowed without restriction.
      */
-    CZCacheStoragePolicyAllowed             = 0,
+    PROCacheStoragePolicyAllowed            = 0,
     
     /**
-     Specifies that storage in a CZAsyncCache is allowed; however storage should
+     Specifies that storage in a cache is allowed; however storage should
      be restricted to memory only.
      */
-    CZCacheStoragePolicyAllowedInMemoryOnly = 1,
+    PROCacheStoragePolicyAllowedInMemoryOnly = 1,
     
     /**
      Specifies that storage in a CZAsyncCache is not allowed in any fashion, 
      either in memory or on disk.
      */
-    CZCacheStoragePolicyNotAllowed          = 2
+    PROCacheStoragePolicyNotAllowed          = 2
 };
 
 
@@ -69,6 +69,7 @@ typedef NS_ENUM(NSUInteger, CZCacheStoragePolicy) {
 @interface PROCachedData : NSObject <NSCoding, NSCopying, NSSecureCoding>
 
 - (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithCoder:(NSCoder *)aDecoder NS_DESIGNATED_INITIALIZER;
 
 // -----
 // @name Creating a Cached Data
@@ -106,7 +107,7 @@ typedef NS_ENUM(NSUInteger, CZCacheStoragePolicy) {
  */
 - (instancetype)initWithData:(NSData *)data
                     lifetime:(NSTimeInterval)lifetime
-               storagePolicy:(CZCacheStoragePolicy)storagePolicy;
+               storagePolicy:(PROCacheStoragePolicy)storagePolicy;
 
 /**
  Initializes a PROCachedData object.
@@ -123,7 +124,7 @@ typedef NS_ENUM(NSUInteger, CZCacheStoragePolicy) {
  */
 - (instancetype)initWithData:(NSData *)data
                     lifetime:(NSTimeInterval)lifetime
-               storagePolicy:(CZCacheStoragePolicy)storagePolicy
+               storagePolicy:(PROCacheStoragePolicy)storagePolicy
                    timestamp:(NSDate *)timestamp
                     NS_DESIGNATED_INITIALIZER;
 
@@ -158,7 +159,7 @@ typedef NS_ENUM(NSUInteger, CZCacheStoragePolicy) {
  */
 + (PROCachedData *)cachedDataWithData:(NSData *)data
                             lifetime:(NSTimeInterval)lifetime
-                       storagePolicy:(CZCacheStoragePolicy)storagePolicy;
+                       storagePolicy:(PROCacheStoragePolicy)storagePolicy;
 
 /**
  Creates and returns a PROCachedData object.
@@ -177,7 +178,7 @@ typedef NS_ENUM(NSUInteger, CZCacheStoragePolicy) {
  */
 + (PROCachedData *)cachedDataWithData:(NSData *)data
                             lifetime:(NSTimeInterval)lifetime
-                       storagePolicy:(CZCacheStoragePolicy)storagePolicy
+                       storagePolicy:(PROCacheStoragePolicy)storagePolicy
                            timestamp:(NSDate *)timestamp;
 
 // -----
@@ -187,14 +188,19 @@ typedef NS_ENUM(NSUInteger, CZCacheStoragePolicy) {
 #pragma mark Properties
 
 /**
- The receiver's lifetime.
+ The receiver's size, in bytes.
+ */
+@property (readonly) NSUInteger size;
+
+/**
+ The receiver's lifetime, in seconds.
  */
 @property (readonly) NSTimeInterval lifetime;
 
 /**
  The receiver's cache storage policy.
  */
-@property (readonly) CZCacheStoragePolicy storagePolicy;
+@property (readonly) PROCacheStoragePolicy storagePolicy;
 
 /**
  The receiver's cached data.

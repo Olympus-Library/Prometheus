@@ -46,12 +46,12 @@
     NSMutableData *data = [NSMutableData dataWithData:[@"data" dataUsingEncoding:NSUTF8StringEncoding]];
     PROCachedData *cachedData = [[PROCachedData alloc]initWithData:data
                                                         lifetime:0
-                                                   storagePolicy:CZCacheStoragePolicyAllowed];
+                                                   storagePolicy:PROCacheStoragePolicyAllowed];
     [data appendData:[@"modification" dataUsingEncoding:NSUTF8StringEncoding]];
     XCTAssertNotEqual(cachedData.data, data);
     XCTAssertNotEqualObjects(cachedData.data, data);
     XCTAssertEqual(0, cachedData.lifetime);
-    XCTAssertEqual(CZCacheStoragePolicyAllowed, cachedData.storagePolicy);
+    XCTAssertEqual(PROCacheStoragePolicyAllowed, cachedData.storagePolicy);
     XCTAssertEqualObjects([@"data" dataUsingEncoding:NSUTF8StringEncoding], cachedData.data);
 }
 
@@ -59,7 +59,7 @@
 {
     PROCachedData *cachedData = [[PROCachedData alloc]initWithData:[@"data" dataUsingEncoding:NSUTF8StringEncoding]
                                                         lifetime:0];
-    XCTAssertEqual(CZCacheStoragePolicyAllowed, cachedData.storagePolicy);
+    XCTAssertEqual(PROCacheStoragePolicyAllowed, cachedData.storagePolicy);
 }
 
 - (void)testNSCopying
@@ -73,10 +73,15 @@
 
 - (void)testIsEqualsAndHash
 {
+    NSDate *date = [NSDate date];
     PROCachedData *firstData = [[PROCachedData alloc]initWithData:[@"data" dataUsingEncoding:NSUTF8StringEncoding]
-                                                       lifetime:0];;
+                                                       lifetime:0
+                                                    storagePolicy:PROCacheStoragePolicyAllowed
+                                                        timestamp:date];
     PROCachedData *secondData = [[PROCachedData alloc]initWithData:[@"data" dataUsingEncoding:NSUTF8StringEncoding]
-                                                        lifetime:0];
+                                                          lifetime:0
+                                                     storagePolicy:PROCacheStoragePolicyAllowed
+                                                         timestamp:date];
     XCTAssertEqualObjects(firstData, secondData);
     XCTAssertEqual([firstData hash], [secondData hash]);
 }

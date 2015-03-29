@@ -73,6 +73,16 @@
     
 }
 
+- (PROCachedData *)cachedDataForKey:(PROCacheKey *)key
+{
+    return nil;
+}
+
+- (void)storeCachedData:(PROCachedData *)data forKey:(PROCacheKey *)key
+{
+    
+}
+
 #pragma mark Removing Cached Objects
 
 - (void)removeAllCachedDataWithCompletion:(PROCacheOperationCompletion)completion
@@ -82,6 +92,16 @@
 
 - (void)removeCachedDataForKey:(PROCacheKey *)key
                     completion:(PROCacheReadWriteCompletion)completion
+{
+    
+}
+
+- (void)removeAllCachedData
+{
+    
+}
+
+- (void)removeCachedDataForKey:(PROCacheKey *)key
 {
     
 }

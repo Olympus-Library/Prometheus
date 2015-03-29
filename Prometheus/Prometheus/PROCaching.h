@@ -1,5 +1,5 @@
 //
-//  CZAsyncCache.h
+//  PROCaching.h
 //  Prometheus
 //
 //  Copyright (c) 2015 Comyar Zaheri. All rights reserved.
@@ -40,7 +40,7 @@
 
 /**
  */
-typedef void (^PROCacheOperationCompletion)(id<PROCaching> cache);
+typedef void (^PROCacheOperationCompletion)(id<PROCaching> cache, BOOL success);
 
 /**
  */

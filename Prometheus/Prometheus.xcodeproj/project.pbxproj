@@ -24,6 +24,7 @@
 		DDC68D0E1AC74778005627D6 /* PROMemoryCache.m in Sources */ = {isa = PBXBuildFile; fileRef = DDC68D001AC74778005627D6 /* PROMemoryCache.m */; };
 		DDC68D111AC7478A005627D6 /* PROCachedDataTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DDC68D0F1AC7478A005627D6 /* PROCachedDataTest.m */; };
 		DDC68D121AC7478A005627D6 /* PROCacheKeyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDC68D101AC7478A005627D6 /* PROCacheKeyTests.m */; };
+		DDEB44551AC7F1C700791ADB /* PROMemoryCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDEB44541AC7F1C700791ADB /* PROMemoryCacheTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,7 @@
 		DDC68D0F1AC7478A005627D6 /* PROCachedDataTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PROCachedDataTest.m; sourceTree = "<group>"; };
 		DDC68D101AC7478A005627D6 /* PROCacheKeyTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PROCacheKeyTests.m; sourceTree = "<group>"; };
 		DDC68D151AC74F8D005627D6 /* PROCacheDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PROCacheDelegate.h; sourceTree = "<group>"; };
+		DDEB44541AC7F1C700791ADB /* PROMemoryCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PROMemoryCacheTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +123,7 @@
 			children = (
 				DDC68D0F1AC7478A005627D6 /* PROCachedDataTest.m */,
 				DDC68D101AC7478A005627D6 /* PROCacheKeyTests.m */,
+				DDEB44541AC7F1C700791ADB /* PROMemoryCacheTests.m */,
 				DDC68CE71AC7475C005627D6 /* Supporting Files */,
 			);
 			path = PrometheusTests;
@@ -290,6 +293,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DDC68D121AC7478A005627D6 /* PROCacheKeyTests.m in Sources */,
+				DDEB44551AC7F1C700791ADB /* PROMemoryCacheTests.m in Sources */,
 				DDC68D111AC7478A005627D6 /* PROCachedDataTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -468,6 +472,7 @@
 				DDC68CEF1AC7475C005627D6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		DDC68CF01AC7475C005627D6 /* Build configuration list for PBXNativeTarget "PrometheusTests" */ = {
 			isa = XCConfigurationList;
@@ -476,6 +481,7 @@
 				DDC68CF21AC7475C005627D6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

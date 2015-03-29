@@ -97,4 +97,20 @@
  */
 @property (readonly) NSUInteger currentMemoryUsage;
 
+/**
+ Indicates whether the cache removes all of its cached data when it receives
+ a memory warning.
+ 
+ The default is YES.
+ */
+@property (assign) BOOL removesAllCachedDataOnMemoryWarning;
+
+/**
+ Indicates whether the cache remove all of its cached data when it enters the
+ background.
+ 
+ The default is YES.
+ */
+@property (assign) BOOL removesAllCachedDataOnEnteringBackground;
+
 @end

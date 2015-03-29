@@ -23,7 +23,13 @@
 //  SOFTWARE.
 //
 
-#import <Foundation/Foundation.h>
+
+#pragma mark - Imports
+
+@import Foundation;
+
+
+#pragma mark - PRODiskCache Interface
 
 @interface PRODiskCache : NSObject
 

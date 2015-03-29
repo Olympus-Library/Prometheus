@@ -31,7 +31,6 @@
 
 #pragma mark - Constants
 
-NSTimeInterval PROCachedDataMaxExpiration    = -1.0;
 static const NSUInteger HashPrime           = 17;
 
 
@@ -46,12 +45,12 @@ static const NSUInteger HashPrime           = 17;
 {
     return [self initWithData:data
                      lifetime:lifetime
-                storagePolicy:CZCacheStoragePolicyAllowed];
+                storagePolicy:PROCacheStoragePolicyAllowed];
 }
 
 - (instancetype)initWithData:(NSData *)data
                     lifetime:(NSTimeInterval)lifetime
-               storagePolicy:(CZCacheStoragePolicy)storagePolicy
+               storagePolicy:(PROCacheStoragePolicy)storagePolicy
 {
     return [self initWithData:data
                      lifetime:lifetime
@@ -61,10 +60,15 @@ static const NSUInteger HashPrime           = 17;
 
 - (instancetype)initWithData:(NSData *)data
                     lifetime:(NSTimeInterval)lifetime
-               storagePolicy:(CZCacheStoragePolicy)storagePolicy
+               storagePolicy:(PROCacheStoragePolicy)storagePolicy
                    timestamp:(NSDate *)timestamp
 {
     if (self = [super init]) {
+        if (!data || !timestamp) {
+            @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                           reason:@"nil arguments"
+                                         userInfo:nil];
+        }
         _data           = [data copy];
         _lifetime       = lifetime;
         _storagePolicy  = storagePolicy;
@@ -74,6 +78,7 @@ static const NSUInteger HashPrime           = 17;
         } else {
             _expiration = nil;
         }
+        _size = [PROCachedData sizeWithData:_data];
     }
     return self;
 }
@@ -85,7 +90,7 @@ static const NSUInteger HashPrime           = 17;
 
 + (PROCachedData *)cachedDataWithData:(NSData *)data
                             lifetime:(NSTimeInterval)lifetime
-                       storagePolicy:(CZCacheStoragePolicy)storagePolicy
+                       storagePolicy:(PROCacheStoragePolicy)storagePolicy
 {
     return [[PROCachedData alloc]initWithData:data
                                     lifetime:lifetime
@@ -94,7 +99,7 @@ static const NSUInteger HashPrime           = 17;
 
 + (PROCachedData *)cachedDataWithData:(NSData *)data
                             lifetime:(NSTimeInterval)lifetime
-                       storagePolicy:(CZCacheStoragePolicy)storagePolicy
+                       storagePolicy:(PROCacheStoragePolicy)storagePolicy
                            timestamp:(NSDate *)timestamp
 {
     return [[PROCachedData alloc]initWithData:data
@@ -103,17 +108,32 @@ static const NSUInteger HashPrime           = 17;
                                    timestamp:timestamp];
 }
 
+#pragma mark Private
+
++ (NSUInteger)sizeWithData:(NSData *)data
+{
+    static NSUInteger dateSize = 0;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        dateSize = [NSKeyedArchiver archivedDataWithRootObject:[NSDate date]].length;
+    });
+    //  data + 2 NSDates (timestamp, expiration) + lifetime + storagePolicy
+    return data.length + (2 * dateSize) + sizeof(NSTimeInterval) + sizeof(PROCacheStoragePolicy);
+}
+
 #pragma mark NSObject
 
 - (BOOL)isEqual:(id)object
 {
     if ([object isKindOfClass:[PROCachedData class]]) {
         PROCachedData *other = (PROCachedData *)object;
-        return ([other.data isEqualToData:self.data] &&
-                other.storagePolicy == self.storagePolicy &&
-                other.lifetime == self.lifetime &&
-                [other.timestamp isEqualToDate:self.timestamp] &&
-                [other.expiration isEqualToDate:self.expiration]);
+        if (other.size == self.size &&
+            other.storagePolicy == self.storagePolicy &&
+            other.lifetime == self.lifetime &&
+            [other.timestamp isEqualToDate:self.timestamp] &&
+            [other.data isEqualToData:self.data]) {
+            return YES;
+        }
     }
     return NO;
 }
@@ -128,16 +148,24 @@ static const NSUInteger HashPrime           = 17;
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
-    NSData *data = [aDecoder decodeObjectOfClass:[NSData class] forKey:@"data"];
-    NSTimeInterval lifetime = [aDecoder decodeDoubleForKey:@"lifetime"];
-    CZCacheStoragePolicy storagePolicy = [aDecoder decodeIntegerForKey:@"storagePolicy"];
-    self = [self initWithData:data lifetime:lifetime storagePolicy:storagePolicy];
+    if (self = [super init]) {
+        _size           = [aDecoder decodeIntegerForKey:@"size"];
+        _lifetime       = [aDecoder decodeDoubleForKey:@"lifetime"];
+        _storagePolicy  = [aDecoder decodeIntegerForKey:@"storagePolicy"];
+        _data           = [aDecoder decodeObjectOfClass:[NSData class] forKey:@"data"];
+        _timestamp      = [aDecoder decodeObjectOfClass:[NSDate class] forKey:@"timestamp"];
+        _expiration     = [aDecoder decodeObjectOfClass:[NSDate class] forKey:@"expiration"];
+    }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
     [aCoder encodeObject:self.data forKey:@"data"];
+    [aCoder encodeInteger:self.size forKey:@"size"];
+    [aCoder encodeDouble:self.lifetime forKey:@"lifetime"];
+    [aCoder encodeObject:self.timestamp forKey:@"timestamp"];
+    [aCoder encodeObject:self.expiration forKey:@"expiration"];
     [aCoder encodeInteger:self.storagePolicy forKey:@"storagePolicy"];
 }
 
@@ -147,7 +175,8 @@ static const NSUInteger HashPrime           = 17;
 {
     return [PROCachedData cachedDataWithData:self.data
                                    lifetime:self.lifetime
-                              storagePolicy:self.storagePolicy];
+                              storagePolicy:self.storagePolicy
+                                   timestamp:self.timestamp];
 }
 
 #pragma mark NSSecureCoding
