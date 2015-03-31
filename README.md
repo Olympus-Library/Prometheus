@@ -1,2 +1,2 @@
-![](https://raw.githubusercontent.com/Prometheus-Caching/Resources/master/header.png)
+![](https://raw.githubusercontent.com/Olympus-Library/Resources/master/prometheus-header.png)
 
