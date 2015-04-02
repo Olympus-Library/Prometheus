@@ -5,22 +5,22 @@
 //  Copyright (c) 2015 Comyar Zaheri. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
+//  of this software and associated documentation files (the "Software"), to
+//  deal in the Software without restriction, including without limitation the
+//  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the Software is
 //  furnished to do so, subject to the following conditions:
 //
-//  The above copyright notice and this permission notice shall be included in all
-//  copies or substantial portions of the Software.
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
 //
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-//  SOFTWARE.
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+//  IN THE SOFTWARE.
 //
 
 
@@ -102,6 +102,83 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
 
 #pragma mark Private
 
+// @warning not thread safe
+- (void)reapExpiredCachedData:(PROCachedData *)data forKey:(NSString *)key
+{
+    __weak id<PROCaching> weak = self;
+    if ([_delegate conformsToProtocol:@protocol(PROMemoryCacheDelegate)] &&
+        [_delegate respondsToSelector:@selector(cache:willEvictExpiredDataFromMemory:)]) {
+        [_delegate cache:weak didEvictExpiredDataFromMemory:data];
+    }
+    
+    [_cache removeObjectForKey:key];
+    [_reads removeObjectForKey:key];
+    _currentMemoryUsage -= data.size;
+    
+    if ([_delegate conformsToProtocol:@protocol(PROMemoryCacheDelegate)] &&
+        [_delegate respondsToSelector:@selector(cache:didEvictExpiredDataFromMemory:)]) {
+        [_delegate cache:weak didEvictExpiredDataFromMemory:data];
+    }
+}
+
+// @warning not thread safe
+- (void)reapExpiredCachedData
+{
+    __weak id<PROCaching> weak = self;
+    NSDate *date = [NSDate date];
+    NSArray *keysSortedByDate = [_reads keysSortedByValueUsingSelector:@selector(compare:)];
+    for (NSString *key in keysSortedByDate) {
+        PROCachedData *data = _cache[key];
+        if ([date timeIntervalSinceDate:data.expiration] >= 0) {
+            if ([_delegate conformsToProtocol:@protocol(PROMemoryCacheDelegate)] &&
+                [_delegate respondsToSelector:@selector(cache:shouldEvictExpiredDataFromMemory:)]) {
+                PROCacheEvictExpiredDataDecision decision = [_delegate cache:weak
+                                        shouldEvictExpiredDataFromMemory:data];
+                if (decision == PROCacheEvictExpiredDataDecisionAffirm) {
+                    [self reapExpiredCachedData:data forKey:key];
+                } else if (decision == PROCacheEvictExpiredDataDecisionDeferByLifetime) {
+                    _cache[key] = [data cachedDataByAddingLifetime:data.lifetime];
+                    _reads[key] = date;
+                }
+            } else {
+                [self reapExpiredCachedData:data forKey:key];
+            }
+        } else {
+            break;
+        }
+    }
+}
+
+
+
+// @warning not thread safe
+- (void)reapLeastRecentlyUsed
+{
+    __weak id<PROCaching> weak = self;
+    NSArray *keysSortedByDate = [_reads keysSortedByValueUsingSelector:@selector(compare:)];
+    for (NSString *key in keysSortedByDate) {
+        PROCachedData *data = _cache[key];
+        
+        if ([_delegate conformsToProtocol:@protocol(PROMemoryCacheDelegate)] &&
+            [_delegate respondsToSelector:@selector(cache:willFreeUsageByEvictingFromMemory:)]) {
+            [_delegate cache:weak willFreeUsageByEvictingFromMemory:data];
+        }
+        
+        [_cache removeObjectForKey:key];
+        [_reads removeObjectForKey:key];
+        _currentMemoryUsage -= data.size;
+        
+        if ([_delegate conformsToProtocol:@protocol(PROMemoryCacheDelegate)] &&
+            [_delegate respondsToSelector:@selector(cache:didFreeUsageByEvictingFromMemory:)]) {
+            [_delegate cache:weak didFreeUsageByEvictingFromMemory:data];
+        }
+        
+        if (_currentMemoryUsage < _memoryCapacity) {
+            break;
+        }
+    }
+}
+
 - (void)dispatchAsync:(void (^)(PROMemoryCache *strong))block
 {
     __weak PROMemoryCache *weak = self;
@@ -124,7 +201,7 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
     });
 }
 
-// Note: potential deadlock if block targets the same queue, use carefully
+// @warning potential deadlock if block targets the same queue, use carefully
 - (void)dispatchBarrierSync:(void (^)(PROMemoryCache *strong))block
 {
     __weak PROMemoryCache *weak = self;

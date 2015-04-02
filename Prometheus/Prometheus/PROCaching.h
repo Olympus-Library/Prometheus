@@ -48,20 +48,19 @@ typedef void (^PROCacheReadWriteCompletion)(NSString *key, PROCachedData *data);
 /**
  These constants specify how
  */
-typedef NS_ENUM(NSUInteger, PROCacheEvictionDecision) {
+typedef NS_ENUM(NSUInteger, PROCacheEvictExpiredDataDecision) {
     
     /**
      Specifies that the cache's decision to evict the cached data should not be 
      overridden.
      */
-    PROCacheEvictionDecisionAffirm          = 0,
+    PROCacheEvictExpiredDataDecisionAffirm          = 0,
     
     /**
-     Specifies that the cache's decision to evict should be deferred by the 
-     lifetime of the cached data. In effect, this extends the expiration of the
-     cached data by the duration of its lifetime.
+     Specifies that the cache's decision to evict the expired cached data should 
+     be deferred by the lifetime of the cached data.
      */
-    PROCacheEvictionDecisionDeferByLifetime = 1
+    PROCacheEvictExpiredDataDecisionDeferByLifetime = 1
 };
 
 

@@ -43,11 +43,22 @@
 
 /**
  */
-- (PROCacheEvictionDecision)cache:(id<PROCaching>)cache
-          shouldEvictDataFromDisk:(PROCachedData *)data;
+- (PROCacheEvictExpiredDataDecision)cache:(__weak id<PROCaching>)cache
+           shouldEvictExpiredDataFromDisk:(PROCachedData *)data;
 
 /**
  */
-- (void)cache:(id<PROCaching>)cache didEvictDataFromDisk:(PROCachedData *)data;
+- (void)cache:(__weak id<PROCaching>)cache didEvictExpiredDataFromDisk:(PROCachedData *)data;
+
+/**
+ Determines whether the cache should use the cached data on disk for the given
+ version.
+ */
+- (BOOL)cache:(id<PROCaching>)cache shouldUseDiskCacheVersion:(NSString *)version;
+
+/**
+ Migrates the disk cache from the given version.
+ */
+- (void)cache:(id<PROCaching>)cache migrateFromDiskCacheVersion:(NSString *)version;
 
 @end

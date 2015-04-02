@@ -29,9 +29,25 @@
 #import "PRODiskCache.h"
 
 
+#pragma mark - Constants
+
+static NSString * const PRODiskCacheSharedQueueName = @"com.prometheus.disk";
+
+
+#pragma mark - PRODiskCache Class Extension
+
+@interface PRODiskCache ()
+
+@property (readonly) dispatch_queue_t queue;
+
+@end
+
+
 #pragma mark - PRODiskCache Implementation
 
 @implementation PRODiskCache
+
+#pragma mark Creating a Disk Cache
 
 - (instancetype)initWithDiskCapacity:(NSUInteger)diskCapacity
                             diskPath:(NSString *)diskPath
@@ -39,8 +55,19 @@
     if (self = [super init]) {
         _diskPath = diskPath;
         _diskCapacity = diskCapacity;
+        _queue = [PRODiskCache sharedQueue];
     }
     return self;
+}
+
++ (dispatch_queue_t)sharedQueue
+{
+    static dispatch_queue_t sharedQueue = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedQueue = dispatch_queue_create([PRODiskCacheSharedQueueName UTF8String], DISPATCH_QUEUE_SERIAL);
+    });
+    return sharedQueue;
 }
 
 #pragma mark Getting and Storing Cached Objects

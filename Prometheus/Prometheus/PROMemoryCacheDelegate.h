@@ -43,11 +43,23 @@
 
 /**
  */
-- (PROCacheEvictionDecision)cache:(id<PROCaching>)cache
-        shouldEvictDataFromMemory:(PROCachedData *)data;
+- (PROCacheEvictExpiredDataDecision)cache:(__weak id<PROCaching>)cache
+         shouldEvictExpiredDataFromMemory:(PROCachedData *)data;
 
 /**
  */
-- (void)cache:(id<PROCaching>)cache didEvictDataFromMemory:(PROCachedData *)data;
+- (void)cache:(__weak id<PROCaching>)cache willEvictExpiredDataFromMemory:(PROCachedData *)data;
+
+/**
+ */
+- (void)cache:(__weak id<PROCaching>)cache didEvictExpiredDataFromMemory:(PROCachedData *)data;
+
+/**
+ */
+- (void)cache:(__weak id<PROCaching>)cache willFreeUsageByEvictingFromMemory:(PROCachedData *)data;
+
+/**
+ */
+- (void)cache:(__weak id<PROCaching>)cache didFreeUsageByEvictingFromMemory:(PROCachedData *)data;
 
 @end

@@ -31,7 +31,8 @@
 
 #pragma mark - Constants
 
-static const NSUInteger HashPrime           = 17;
+static const NSUInteger HashPrime                   = 17;
+const NSTimeInterval PROCachedDataLifetimeInfinity  = DBL_MAX;
 
 
 #pragma mark - PROCachedData Implementation
@@ -84,6 +85,18 @@ static const NSUInteger HashPrime           = 17;
     return [[PROCachedData alloc]initWithData:data
                                     lifetime:lifetime
                                    timestamp:timestamp];
+}
+
+#pragma mark Adding to Lifetime
+
+- (PROCachedData *)cachedDataByAddingLifetime:(NSTimeInterval)lifetime
+{
+    NSTimeInterval copyLifetime = self.lifetime + lifetime;
+    PROCachedData *copy = [[PROCachedData alloc]initWithData:self.data
+                                                    lifetime:copyLifetime
+                                                   timestamp:self.timestamp];
+    copy.storagePolicy = self.storagePolicy;
+    return copy;
 }
 
 #pragma mark Private

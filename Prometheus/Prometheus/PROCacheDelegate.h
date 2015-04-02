@@ -43,15 +43,6 @@
 
 @optional
 
-/**
- Determines whether the cache should use the cached data on disk for the given
- version.
- */
-- (BOOL)cache:(id<PROCaching>)cache shouldUseDiskCacheVersion:(NSString *)version;
 
-/**
- Migrates the disk cache from the given version.
- */
-- (void)cache:(id<PROCaching>)cache migrateFromDiskCacheVersion:(NSString *)version;
 
 @end

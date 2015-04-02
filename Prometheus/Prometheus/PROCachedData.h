@@ -31,7 +31,7 @@
 
 #pragma mark - Constants
 
-extern NSTimeInterval PROCachedDataMaxExpiration;
+extern const NSTimeInterval PROCachedDataLifetimeInfinity;
 
 
 #pragma mark - Type Definitions
@@ -143,6 +143,25 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
 + (PROCachedData *)cachedDataWithData:(NSData *)data
                             lifetime:(NSTimeInterval)lifetime
                            timestamp:(NSDate *)timestamp;
+
+// -----
+// @name Adding to Lifetime
+// -----
+
+#pragma mark Adding to Lifetime
+
+/**
+ Returns a new PROCachedData object whose lifetime is set to a given number of
+ seconds relative to the receiver.
+ 
+ @param     lifetime
+            The numer of seconds to add to the receiver's lifetime. Use a 
+            negative value for the lifetime of the returned object be less than
+            that of the receiver.
+ @return    A new PROCachedData object whose lifetime is set to lifetime seconds
+            relative to the receiver.
+ */
+- (PROCachedData *)cachedDataByAddingLifetime:(NSTimeInterval)lifetime;
 
 // -----
 // @name Properties
