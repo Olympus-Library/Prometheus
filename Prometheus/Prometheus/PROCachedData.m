@@ -32,7 +32,7 @@
 #pragma mark - Constants
 
 static const NSUInteger HashPrime                   = 17;
-const NSTimeInterval PROCachedDataLifetimeInfinity  = DBL_MAX;
+const NSTimeInterval PROCachedDataLifetimeInfinity  = DBL_MIN;
 
 
 #pragma mark - PROCachedData Implementation

@@ -43,6 +43,7 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
 @interface PROMemoryCache ()
 
 @property (readonly) dispatch_queue_t       queue;
+@property (readonly) dispatch_semaphore_t   semaphore;
 @property (readonly) NSMutableDictionary    *reads;
 @property (readonly) NSMutableDictionary    *cache;
 
@@ -65,6 +66,7 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
     if (self = [super init]) {
         NSString *queueName = [NSString stringWithFormat:@"%@.%p", PROMemoryCacheQueueNamePrefix, self];
         _queue = dispatch_queue_create([queueName UTF8String], DISPATCH_QUEUE_CONCURRENT);
+        _semaphore = dispatch_semaphore_create(1);
         _currentMemoryUsage = 0;
         _memoryCapacity = memoryCapacity;
         _cache = [NSMutableDictionary new];
@@ -179,98 +181,35 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
     }
 }
 
-- (void)dispatchAsync:(void (^)(PROMemoryCache *strong))block
-{
-    __weak PROMemoryCache *weak = self;
-    dispatch_async(_queue, ^{
-        PROMemoryCache *strong = weak;
-        if (strong) {
-            block(strong);
-        }
-    });
-}
-
-- (void)dispatchBarrierAsync:(void (^)(PROMemoryCache *strong))block
-{
-    __weak PROMemoryCache *weak = self;
-    dispatch_barrier_async(_queue, ^{
-        PROMemoryCache *strong = weak;
-        if (strong) {
-            block(strong);
-        }
-    });
-}
-
-// @warning potential deadlock if block targets the same queue, use carefully
-- (void)dispatchBarrierSync:(void (^)(PROMemoryCache *strong))block
-{
-    __weak PROMemoryCache *weak = self;
-    dispatch_barrier_sync(_queue, ^{
-        PROMemoryCache *strong = weak;
-        if (strong) {
-            block(strong);
-        }
-    });
-}
-
 #pragma mark Getting and Storing Cached Objects
 
 - (void)cachedDataForKey:(NSString *)key
               completion:(PROCacheReadWriteCompletion)completion
 {
-    if (!key || !completion) {
+    if (!completion) {
         return;
     }
     
-    NSDate *date = [NSDate date];
-    
-    [self dispatchAsync:^(PROMemoryCache *strong) {
-        PROCachedData *data = [strong.cache objectForKey:key];
-        if (data) {
-            if (data.expiration && [date timeIntervalSinceDate:data.expiration] >= 0) {
-                [strong removeCachedDataForKey:key completion:nil];
-                completion(key, nil);
-            } else {
-                [strong dispatchBarrierAsync:^(PROMemoryCache *strong) {
-                    [strong.reads setObject:date forKey:key];
-                }];
-                completion(key, data);
-            }
-        } else {
-            completion(key, nil);
-        }
-    }];
+    __weak PROMemoryCache *weak = self;
+    dispatch_async(_queue, ^{
+        PROMemoryCache *strong = weak;
+        PROCachedData *data = [strong cachedDataForKey:key];
+        completion(weak, key, data);
+    });
 }
 
 - (void)storeCachedData:(PROCachedData *)data
                  forKey:(NSString *)key
              completion:(PROCacheReadWriteCompletion)completion
 {
-    if (!key || !data ||
-        data.storagePolicy == PROCacheStoragePolicyNotAllowed) {
-        [self dispatchAsync:^(PROMemoryCache *strong) {
-            completion(key, nil);
-        }];
-        return;
-    }
-    
-    NSDate *date = [NSDate date];
-    
-    [self dispatchAsync: ^(PROMemoryCache *strong) {
-        strong.cache[key] = data;
-        strong.reads[key] = date;
-        
-        strong->_currentMemoryUsage += data.size;
-        if (strong.currentMemoryUsage > strong.memoryCapacity) {
-            // TODO: trim size of cache
-        }
-        
+    __weak PROMemoryCache *weak = self;
+    dispatch_async(_queue, ^{
+        PROMemoryCache *strong = weak;
+        [strong storeCachedData:data forKey:key];
         if (completion) {
-            [strong dispatchAsync:^(PROMemoryCache *strong) {
-                completion(key, data);
-            }];
+            completion(weak, key, data);
         }
-    }];
+    });
 }
 
 - (PROCachedData *)cachedDataForKey:(NSString *)key
@@ -281,11 +220,16 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
     
     NSDate *date = [NSDate date];
     
-    __block PROCachedData *data = nil;
-    [self dispatchBarrierSync:^(PROMemoryCache *strong) {
-        data = strong.cache[key];
-        strong.reads[key] = date;
-    }];
+    PROCachedData *data = nil;
+    dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
+    data = _cache[key];
+    dispatch_semaphore_signal(_semaphore);
+    
+    if (data) {
+        dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
+        _reads[key] = date;
+        dispatch_semaphore_signal(_semaphore);
+    }
     
     return data;
 }
@@ -299,68 +243,61 @@ static NSString * const PROMemoryCacheQueueNamePrefix = @"com.prometheus.memory"
     
     NSDate *date = [NSDate date];
     
-    [self dispatchBarrierSync:^(PROMemoryCache *strong) {
-        strong.cache[key] = data;
-        strong.reads[key] = date;
-        strong->_currentMemoryUsage += data.size;
-        
-        if (strong.currentMemoryUsage > strong.memoryCapacity) {
-            // TODO: trim size of cache
-        }
-    }];
+    dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
+    _cache[key] = data;
+    _reads[key] = date;
+    _currentMemoryUsage += data.size;
+    dispatch_semaphore_signal(_semaphore);
+    
+    if (_currentMemoryUsage > _memoryCapacity) {
+        // TODO: trim size of cache
+    }
 }
 
 #pragma mark Removing Cached Objects
 
 - (void)removeAllCachedDataWithCompletion:(PROCacheOperationCompletion)completion
 {
-    [self dispatchBarrierAsync:^(PROMemoryCache *strong) {
-        [strong.cache removeAllObjects];
-        [strong.reads removeAllObjects];
-        strong->_currentMemoryUsage = 0;
-        
+    __weak PROMemoryCache *weak = self;
+    dispatch_async(_queue, ^{
+        PROMemoryCache *strong = weak;
+        [strong removeAllCachedData];
         if (completion) {
-            [strong dispatchAsync:^(PROMemoryCache *strong) {
-                completion(strong, YES);
-            }];
+            completion(weak, YES);
         }
-    }];
+    });
 }
 
 - (void)removeCachedDataForKey:(NSString *)key
                     completion:(PROCacheReadWriteCompletion)completion
 {
-    [self dispatchBarrierAsync:^(PROMemoryCache *strong) {
-        PROCachedData *data = strong.cache[key];
-        [strong.cache removeObjectForKey:key];
-        [strong.reads removeObjectForKey:key];
-        strong->_currentMemoryUsage -= data.size;
-        
+    __weak PROMemoryCache *weak = self;
+    dispatch_async(_queue, ^{
+        PROMemoryCache *strong = weak;
+        [strong removeCachedDataForKey:key];
         if (completion) {
-            [strong dispatchAsync:^(PROMemoryCache *strong) {
-                completion(key, nil);
-            }];
+            completion(weak, key, nil);
         }
-    }];
+    });
 }
 
 - (void)removeAllCachedData
 {
-    [self dispatchBarrierSync:^(PROMemoryCache *strong) {
-        [strong.cache removeAllObjects];
-        [strong.reads removeAllObjects];
-        strong->_currentMemoryUsage = 0;
-    }];
+    dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
+    [_cache removeAllObjects];
+    [_reads removeAllObjects];
+    _currentMemoryUsage = 0;
+    dispatch_semaphore_signal(_semaphore);
 }
 
 - (void)removeCachedDataForKey:(NSString *)key
 {
-    [self dispatchBarrierSync:^(PROMemoryCache *strong) {
-        PROCachedData *data = strong.cache[key];
-        [strong.cache removeObjectForKey:key];
-        [strong.reads removeObjectForKey:key];
-        strong->_currentMemoryUsage -= data.size;
-    }];
+    dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
+    PROCachedData *data = _cache[key];
+    [_cache removeObjectForKey:key];
+    [_reads removeObjectForKey:key];
+    _currentMemoryUsage -= data.size;
+    dispatch_semaphore_signal(_semaphore);
 }
 
 @end

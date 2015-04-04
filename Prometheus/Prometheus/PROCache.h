@@ -50,6 +50,7 @@ extern const NSUInteger PROCacheSharedDiskCapacity;
  */
 extern const NSUInteger PROCacheSharedMemoryCapacity;
 
+
 #pragma mark - PROCache Interface
 
 /**

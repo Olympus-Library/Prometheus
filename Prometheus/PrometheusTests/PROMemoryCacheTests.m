@@ -33,7 +33,7 @@
 
 #pragma mark - Constants and Functions
 
-static NSTimeInterval DefaultAsyncTestTimeout = 5.0;
+static NSTimeInterval DefaultAsyncTestTimeout = 10.0;
 static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     return dispatch_time(DISPATCH_TIME_NOW, (int64_t) seconds * NSEC_PER_SEC);
 }
@@ -80,7 +80,7 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     
     __block PROCachedData *actual = nil;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    [cache cachedDataForKey:@"test" completion:^(NSString *key, PROCachedData *data) {
+    [cache cachedDataForKey:@"test" completion:^(id<PROCaching> cache, NSString *key, PROCachedData *data) {
         actual = data;
         dispatch_semaphore_signal(semaphore);
     }];
@@ -100,7 +100,7 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     __block NSString *actualKey = nil;
     __block PROCachedData *actualData = nil;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    [cache storeCachedData:expectedData forKey:@"test" completion:^(NSString *key, PROCachedData *data) {
+    [cache storeCachedData:expectedData forKey:@"test" completion:^(id<PROCaching> cache, NSString *key, PROCachedData *data) {
         actualKey = key;
         actualData = data;
         dispatch_semaphore_signal(semaphore);
@@ -124,7 +124,7 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     __block NSString *actualKey = nil;
     __block PROCachedData *actualData = nil;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    [cache storeCachedData:expectedData forKey:@"test" completion:^(NSString *key, PROCachedData *data) {
+    [cache storeCachedData:expectedData forKey:@"test" completion:^(id<PROCaching> cache, NSString *key, PROCachedData *data) {
         actualKey = key;
         actualData = data;
         dispatch_semaphore_signal(semaphore);
@@ -176,7 +176,7 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     __block NSString *actualKey = nil;
     __block PROCachedData *actualData = nil;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    [cache removeCachedDataForKey:@"test" completion:^(NSString *key, PROCachedData *data) {
+    [cache removeCachedDataForKey:@"test" completion:^(id<PROCaching> cache, NSString *key, PROCachedData *data) {
         actualKey = key;
         actualData = data;
         dispatch_semaphore_signal(semaphore);
@@ -281,6 +281,15 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     for (int i = 0; i < numFetches; ++i) {
         dispatch_group_async(group, queue, ^{
             [cache cachedDataForKey:@"test"];
+            [cache storeCachedData:expected forKey:@"test"
+                        completion:^(__weak id<PROCaching> cache, NSString *key, PROCachedData *data) {
+                            [cache cachedDataForKey:@"test"];
+            }];
+            [cache storeCachedData:expected forKey:@"test"];
+            [cache cachedDataForKey:@"test"
+                         completion:^(__weak id<PROCaching> cache, NSString *key, PROCachedData *data) {
+                             [cache storeCachedData:data forKey:key];
+            }];
             [fetchLock lock];
             completedFetches++;
             [fetchLock unlock];
@@ -288,7 +297,7 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     }
     
     dispatch_group_wait(group, timeout(DefaultAsyncTestTimeout));
-    XCTAssertTrue(numFetches == completedFetches, @"didn't complete fetches, possibly due to deadlock.");
+    XCTAssertTrue(numFetches == completedFetches, @"didn't complete operations, possibly due to deadlock.");
 }
 
 #pragma mark Helper

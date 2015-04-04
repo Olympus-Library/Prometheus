@@ -53,7 +53,7 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
     PROCacheStoragePolicyAllowedInMemoryOnly = 1,
     
     /**
-     Specifies that storage in a CZAsyncCache is not allowed in any fashion, 
+     Specifies that storage in a cache is not allowed in any fashion,
      either in memory or on disk.
      */
     PROCacheStoragePolicyNotAllowed          = 2
@@ -80,7 +80,7 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
 /**
  Initializes a PROCachedData object.
  
- The cache storage policy is set to the default, CZCacheStoragePolicyAllowed, 
+ The cache storage policy is set to the default, PROCacheStoragePolicyAllowed,
  and the timestamp is set to the current time.
  
  @param     data
@@ -95,7 +95,7 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
 /**
  Initializes a PROCachedData object.
  
- The cache storage policy is set to the default, CZCacheStoragePolicyAllowed.
+ The cache storage policy is set to the default, PROCacheStoragePolicyAllowed.
  
  @param     data
             The data to cache.
@@ -110,11 +110,10 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
                    timestamp:(NSDate *)timestamp
                     NS_DESIGNATED_INITIALIZER;
 
-
 /**
  Creates and returns a PROCachedData object.
  
- The cache storage policy is set to the default, CZCacheStoragePolicyAllowed,
+ The cache storage policy is set to the default, PROCacheStoragePolicyAllowed,
  and the timestamp is set to the current time.
  
  @param     data
@@ -124,7 +123,7 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
  @return    The newly created PROCachedData object.
  */
 + (PROCachedData *)cachedDataWithData:(NSData *)data
-                            lifetime:(NSTimeInterval)lifetime;
+                             lifetime:(NSTimeInterval)lifetime;
 
 /**
  Creates and returns a PROCachedData object.
@@ -141,8 +140,8 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
  @return    The newly created PROCachedData object.
  */
 + (PROCachedData *)cachedDataWithData:(NSData *)data
-                            lifetime:(NSTimeInterval)lifetime
-                           timestamp:(NSDate *)timestamp;
+                             lifetime:(NSTimeInterval)lifetime
+                            timestamp:(NSDate *)timestamp;
 
 // -----
 // @name Adding to Lifetime
@@ -152,7 +151,7 @@ typedef NS_ENUM(NSUInteger, PROCacheStoragePolicy) {
 
 /**
  Returns a new PROCachedData object whose lifetime is set to a given number of
- seconds relative to the receiver.
+ seconds relative to the receiver's lifetime.
  
  @param     lifetime
             The numer of seconds to add to the receiver's lifetime. Use a 

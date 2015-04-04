@@ -39,11 +39,11 @@
 
 /**
  */
-typedef void (^PROCacheOperationCompletion)(id<PROCaching> cache, BOOL success);
+typedef void (^PROCacheOperationCompletion)(__weak id<PROCaching> cache, BOOL success);
 
 /**
  */
-typedef void (^PROCacheReadWriteCompletion)(NSString *key, PROCachedData *data);
+typedef void (^PROCacheReadWriteCompletion)(__weak id<PROCaching> cache, NSString *key, PROCachedData *data);
 
 /**
  These constants specify how
