@@ -1,0 +1,10 @@
+PODS:
+  - Chronos (0.1.3)
+
+DEPENDENCIES:
+  - Chronos
+
+SPEC CHECKSUMS:
+  Chronos: 187e76d8d627a1323774635b403bc33961e1fbe7
+
+COCOAPODS: 0.36.3
