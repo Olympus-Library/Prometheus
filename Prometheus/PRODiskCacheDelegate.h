@@ -37,28 +37,47 @@
 
 #pragma mark - PRODiskCacheDelegate Protocol
 
+/**
+ */
 @protocol PRODiskCacheDelegate <NSObject>
 
 @optional
 
 /**
  */
-- (PROCacheEvictExpiredDataDecision)cache:(__weak id<PROCaching>)cache
+- (PROCacheEvictExpiredDataDecision)cache:(__weak id<PRODiskCaching>)cache
            shouldEvictExpiredDataFromDisk:(PROCachedData *)data;
 
 /**
  */
-- (void)cache:(__weak id<PROCaching>)cache didEvictExpiredDataFromDisk:(PROCachedData *)data;
+- (PROCacheEvictLRUDataDecision)cache:(__weak id<PRODiskCaching>)cache
+           shouldEvictLRUDataFromDisk:(PROCachedData *)data;
+
+/**
+ */
+- (void)cache:(__weak id<PRODiskCaching>)cache willEvictExpiredDataFromDisk:(PROCachedData *)data;
+
+/**
+ */
+- (void)cache:(__weak id<PRODiskCaching>)cache didEvictExpiredDataFromDisk:(PROCachedData *)data;
+
+/**
+ */
+- (void)cache:(__weak id<PRODiskCaching>)cache willEvictLRUDataFromDisk:(PROCachedData *)data;
+
+/**
+ */
+- (void)cache:(__weak id<PRODiskCaching>)cache didEvictLRUDataFromDisk:(PROCachedData *)data;
 
 /**
  Determines whether the cache should use the cached data on disk for the given
  version.
  */
-- (BOOL)cache:(id<PROCaching>)cache shouldUseDiskCacheVersion:(NSString *)version;
+- (BOOL)cache:(id<PRODiskCaching>)cache shouldUseDiskCacheVersion:(NSString *)version;
 
 /**
  Migrates the disk cache from the given version.
  */
-- (void)cache:(id<PROCaching>)cache migrateFromDiskCacheVersion:(NSString *)version;
+- (void)cache:(id<PRODiskCaching>)cache migrateFromDiskCacheVersion:(NSString *)version;
 
 @end

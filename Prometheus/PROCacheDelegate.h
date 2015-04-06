@@ -39,10 +39,10 @@
 
 #pragma mark - PROCacheDelegate Protocol
 
+/**
+ */
 @protocol PROCacheDelegate <NSObject, PRODiskCacheDelegate, PROMemoryCacheDelegate>
 
 @optional
-
-
 
 @end

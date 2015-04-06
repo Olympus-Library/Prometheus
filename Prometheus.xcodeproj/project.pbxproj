@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		370027615D6953C8795E7A8F /* libPods-Prometheus iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 71B6A2B93DDB81CE7E986307 /* libPods-Prometheus iOS.a */; };
+		A6EAEDA10F781A2BF517918E /* libPods-Prometheus OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 218DC49EFA50AB9368A83606 /* libPods-Prometheus OSX.a */; };
 		D6BF0C23A2B39BF9A42E8705 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F57839E843AB2E0F32878058 /* libPods.a */; };
 		DD9ED4D91AD11E200068D45E /* Prometheus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD9ED4CE1AD11E200068D45E /* Prometheus.framework */; };
 		DD9ED4EA1AD11E870068D45E /* PROCachedDataTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDC68D0F1AC7478A005627D6 /* PROCachedDataTests.m */; };
@@ -88,7 +90,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		083E1BD9F59BC7E497A224D0 /* Pods-Prometheus OSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Prometheus OSX.release.xcconfig"; path = "Pods/Target Support Files/Pods-Prometheus OSX/Pods-Prometheus OSX.release.xcconfig"; sourceTree = "<group>"; };
+		218DC49EFA50AB9368A83606 /* libPods-Prometheus OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Prometheus OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		43496A45A7586551FFB8CDC8 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		71B6A2B93DDB81CE7E986307 /* libPods-Prometheus iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Prometheus iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		784825704C5BCCBE5B711B09 /* Pods-Prometheus iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Prometheus iOS.release.xcconfig"; path = "Pods/Target Support Files/Pods-Prometheus iOS/Pods-Prometheus iOS.release.xcconfig"; sourceTree = "<group>"; };
+		805DE1A96076771163A5FAAC /* Pods-Prometheus iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Prometheus iOS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Prometheus iOS/Pods-Prometheus iOS.debug.xcconfig"; sourceTree = "<group>"; };
 		B04BACB4101B0E45329DC760 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		DD9ED4CE1AD11E200068D45E /* Prometheus.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Prometheus.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD9ED4D81AD11E200068D45E /* Prometheus OSX Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Prometheus OSX Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -113,6 +120,7 @@
 		DDEB44541AC7F1C700791ADB /* PROMemoryCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PROMemoryCacheTests.m; sourceTree = "<group>"; };
 		DDEB44561AC815F500791ADB /* PROMemoryCacheDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PROMemoryCacheDelegate.h; sourceTree = "<group>"; };
 		DDEB44571AC8163600791ADB /* PRODiskCacheDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PRODiskCacheDelegate.h; sourceTree = "<group>"; };
+		EB5D6ED2B23D0DB58570D36F /* Pods-Prometheus OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Prometheus OSX.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Prometheus OSX/Pods-Prometheus OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		F57839E843AB2E0F32878058 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -121,6 +129,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A6EAEDA10F781A2BF517918E /* libPods-Prometheus OSX.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,6 +146,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D6BF0C23A2B39BF9A42E8705 /* libPods.a in Frameworks */,
+				370027615D6953C8795E7A8F /* libPods-Prometheus iOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -155,6 +165,10 @@
 			children = (
 				43496A45A7586551FFB8CDC8 /* Pods.debug.xcconfig */,
 				B04BACB4101B0E45329DC760 /* Pods.release.xcconfig */,
+				EB5D6ED2B23D0DB58570D36F /* Pods-Prometheus OSX.debug.xcconfig */,
+				083E1BD9F59BC7E497A224D0 /* Pods-Prometheus OSX.release.xcconfig */,
+				805DE1A96076771163A5FAAC /* Pods-Prometheus iOS.debug.xcconfig */,
+				784825704C5BCCBE5B711B09 /* Pods-Prometheus iOS.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -163,6 +177,8 @@
 			isa = PBXGroup;
 			children = (
 				F57839E843AB2E0F32878058 /* libPods.a */,
+				218DC49EFA50AB9368A83606 /* libPods-Prometheus OSX.a */,
+				71B6A2B93DDB81CE7E986307 /* libPods-Prometheus iOS.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -300,10 +316,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DD9ED4E11AD11E200068D45E /* Build configuration list for PBXNativeTarget "Prometheus OSX" */;
 			buildPhases = (
+				8E0CD10BFCC77E043AE9ECC4 /* Check Pods Manifest.lock */,
 				DD9ED4C91AD11E200068D45E /* Sources */,
 				DD9ED4CA1AD11E200068D45E /* Frameworks */,
 				DD9ED4CB1AD11E200068D45E /* Headers */,
 				DD9ED4CC1AD11E200068D45E /* Resources */,
+				4686D26E657CFF6B25F11D36 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -447,6 +465,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		4686D26E657CFF6B25F11D36 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Prometheus OSX/Pods-Prometheus OSX-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		6E8476F87B442B6CE17C1A59 /* Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -459,10 +492,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Prometheus iOS/Pods-Prometheus iOS-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		83A65494F7B036A2A11F46AF /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		8E0CD10BFCC77E043AE9ECC4 /* Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -538,7 +586,9 @@
 /* Begin XCBuildConfiguration section */
 		DD9ED4E21AD11E200068D45E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EB5D6ED2B23D0DB58570D36F /* Pods-Prometheus OSX.debug.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -552,7 +602,7 @@
 				INFOPLIST_FILE = Prometheus/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = Prometheus;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -561,7 +611,9 @@
 		};
 		DD9ED4E31AD11E200068D45E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 083E1BD9F59BC7E497A224D0 /* Pods-Prometheus OSX.release.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
@@ -572,7 +624,7 @@
 				INFOPLIST_FILE = Prometheus/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = Prometheus;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -708,33 +760,39 @@
 		};
 		DDC68CEE1AC7475C005627D6 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 43496A45A7586551FFB8CDC8 /* Pods.debug.xcconfig */;
+			baseConfigurationReference = 805DE1A96076771163A5FAAC /* Pods-Prometheus iOS.debug.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Prometheus/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = Prometheus;
 				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
 		DDC68CEF1AC7475C005627D6 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B04BACB4101B0E45329DC760 /* Pods.release.xcconfig */;
+			baseConfigurationReference = 784825704C5BCCBE5B711B09 /* Pods-Prometheus iOS.release.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Prometheus/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = Prometheus;
 				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

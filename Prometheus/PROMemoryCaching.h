@@ -32,6 +32,9 @@
 
 #pragma mark - PROMemoryCaching Protocol
 
+/**
+ */
+NS_PROTOCOL_REQUIRES_EXPLICIT_IMPLEMENTATION
 @protocol PROMemoryCaching <NSObject, PROCaching>
 
 // -----
@@ -49,17 +52,5 @@
  The current size of the receiver's in-memory cache, in bytes.
  */
 @property (readonly) NSUInteger currentMemoryUsage;
-
-/**
- Indicates whether the cache removes all of its cached data when it receives
- a memory warning.
- */
-@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnMemoryWarning;
-
-/**
- Indicates whether the cache remove all of its cached data when it enters the
- background.
- */
-@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnEnteringBackground;
 
 @end

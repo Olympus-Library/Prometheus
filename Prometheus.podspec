@@ -23,5 +23,5 @@ Pod::Spec.new do |s|
   s.source_files  = "Prometheus/*.{h,m}", "Prometheus/**/*.{h,m}"
   s.module_name   = "Prometheus"
   s.requires_arc  = true
-  s.dependency    = 'Chronos'
+  s.dependency 'Chronos'
 end

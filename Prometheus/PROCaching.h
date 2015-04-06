@@ -81,6 +81,8 @@ typedef NS_ENUM(NSUInteger, PROCacheEvictLRUDataDecision) {
 
 #pragma mark - PROCaching Protocol
 
+/**
+ */
 NS_PROTOCOL_REQUIRES_EXPLICIT_IMPLEMENTATION
 @protocol PROCaching <NSObject>
 
@@ -135,8 +137,9 @@ NS_PROTOCOL_REQUIRES_EXPLICIT_IMPLEMENTATION
             The cached data to store.
  @param     key
             The cache key for which the cached data is being stored.
+ @return    YES if the cache data was successfully stored in the cache.
  */
-- (void)storeCachedData:(PROCachedData *)data forKey:(NSString *)key;
+- (BOOL)storeCachedData:(PROCachedData *)data forKey:(NSString *)key;
 
 // -----
 // @name Removing Cached Objects

@@ -50,6 +50,8 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
 @property (readonly) NSMutableDictionary    *reads;
 @property (readonly) NSMutableDictionary    *cache;
 @property (readonly) CHRDispatchTimer       *timer;
+
+// cache begins LRU eviction when exceeding this value
 @property (readonly) NSUInteger             maxMemoryPressure;
 
 @end
@@ -62,7 +64,6 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
 - (void)dealloc
 {
     [_timer cancel];
-    [[NSNotificationCenter defaultCenter]removeObserver:self];
 }
 
 #pragma mark Creating a Memory Cache
@@ -78,18 +79,8 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
         _maxMemoryPressure = (NSUInteger) ceilf(PROMemoryCacheMaxPressureFactor * _memoryCapacity);
         _cache = [NSMutableDictionary new];
         _reads = [NSMutableDictionary new];
-        _removesAllCachedDataOnMemoryWarning = YES;
-        _removesAllCachedDataOnEnteringBackground = YES;
-#if TARGET_OS_IPHONE
-        [[NSNotificationCenter defaultCenter]addObserver:self
-                                                selector:@selector(didObserveNotification:)
-                                                    name:UIApplicationDidReceiveMemoryWarningNotification
-                                                  object:[UIApplication sharedApplication]];
-        [[NSNotificationCenter defaultCenter]addObserver:self
-                                                selector:@selector(didObserveNotification:)
-                                                    name:UIApplicationDidEnterBackgroundNotification
-                                                  object:[UIApplication sharedApplication]];
-#endif
+        
+        // initialize garbage collector
         __weak PROMemoryCache *weak = self;
         _timer = [CHRDispatchTimer timerWithInterval:PROMemoryCacheGarbageCollectInterval
                                       executionBlock:^(CHRDispatchTimer *__weak timer,
@@ -100,21 +91,6 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
                                       }];
     }
     return self;
-}
-
-#pragma mark Notifications
-
-- (void)didObserveNotification:(NSNotification *)notification
-{
-#if TARGET_OS_IPHONE
-    if ([notification.name isEqualToString:UIApplicationDidEnterBackgroundNotification] &&
-        self.removesAllCachedDataOnEnteringBackground) {
-        [self removeAllCachedDataWithCompletion:nil];
-    } else if ([notification.name isEqualToString:UIApplicationDidReceiveMemoryWarningNotification] &&
-               self.removesAllCachedDataOnMemoryWarning) {
-        [self removeAllCachedDataWithCompletion:nil];
-    }
-#endif
 }
 
 #pragma mark Garbage Collection
@@ -241,9 +217,9 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
     
     dispatch_async(_queue, ^{
         PROMemoryCache *strong = weak;
-        [strong storeCachedData:data forKey:key];
+        BOOL success = [strong storeCachedData:data forKey:key];
         if (completion) {
-            completion(weak, key, data);
+            completion(weak, key, success ? data : nil);
         }
     });
 }
@@ -262,8 +238,11 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
     dispatch_semaphore_signal(_semaphore);
     
     if (data) {
+        // make sure data isn't expired, we won't return expired data
         if ([date timeIntervalSinceDate:data.expiration] >= 0) {
             data = nil;
+            // TODO: remove here, or let garbage collect take care of it?
+            // this is blocking so removing here might be bad option...idk
             [self removeCachedDataForKey:key];
         } else {
             dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
@@ -275,31 +254,36 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
     return data;
 }
 
-- (void)storeCachedData:(PROCachedData *)data forKey:(NSString *)key
+- (BOOL)storeCachedData:(PROCachedData *)data forKey:(NSString *)key
 {
     if (!key || !data ||
         data.storagePolicy == PROCacheStoragePolicyNotAllowed) {
-        return;
+        return NO;
     }
     
+    // cannot put any items in cache that exceed the size of the cache!
     if (data.size > _memoryCapacity) {
-        return;
+        return NO;
     }
     
     NSDate *date = [NSDate date];
     
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     if (_currentMemoryUsage == 0) {
-        [_timer start:NO];
+        // start timer if cache went from empty -> not empty
+        [_timer start:NO]; // don't start immediately
     }
     _cache[key] = data;
     _reads[key] = date;
     _currentMemoryUsage += data.size;
     dispatch_semaphore_signal(_semaphore);
     
+    // if new data pushed usage above capacity, we immediately garbage collect
     if (_currentMemoryUsage > _memoryCapacity) {
         [self garbageCollect];
     }
+    
+    return YES;
 }
 
 #pragma mark Removing Cached Objects
@@ -319,11 +303,15 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
 - (void)removeCachedDataForKey:(NSString *)key
                     completion:(PROCacheReadWriteCompletion)completion
 {
-    if (!key) {
+    __weak PROMemoryCache *weak = self;
+    
+    if (!key) {             // key is required
+        if (completion) {   // complete immediately if completion provided
+            completion(weak, key, nil);
+        }
         return;
     }
-    
-    __weak PROMemoryCache *weak = self;
+                       
     dispatch_async(_queue, ^{
         PROMemoryCache *strong = weak;
         [strong removeCachedDataForKey:key];
@@ -339,14 +327,14 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
     [_cache removeAllObjects];
     [_reads removeAllObjects];
     _currentMemoryUsage = 0;
-    [_timer pause];
+    [_timer pause]; // stop the GC timer if no items in cache
     dispatch_semaphore_signal(_semaphore);
 }
 
 - (void)removeCachedDataForKey:(NSString *)key
 {
     if (!key) {
-        return;
+        return; // key is required
     }
     
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
@@ -355,7 +343,7 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
     [_reads removeObjectForKey:key];
     _currentMemoryUsage -= data.size;
     if (_currentMemoryUsage == 0) {
-        [_timer start:NO];
+        [_timer pause]; // stop the GC timer if no items in cache
     }
     dispatch_semaphore_signal(_semaphore);
 }

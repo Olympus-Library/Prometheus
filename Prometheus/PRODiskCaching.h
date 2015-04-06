@@ -32,6 +32,8 @@
 
 #pragma mark - PRODiskCaching Protocol
 
+/**
+ */
 NS_PROTOCOL_REQUIRES_EXPLICIT_IMPLEMENTATION
 @protocol PRODiskCaching <NSObject, PROCaching>
 

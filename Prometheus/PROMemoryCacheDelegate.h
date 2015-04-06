@@ -37,6 +37,8 @@
 
 #pragma mark - PROMemoryCacheDelegate Protocol
 
+/**
+ */
 @protocol PROMemoryCacheDelegate <NSObject>
 
 @optional
@@ -53,18 +55,18 @@
 
 /**
  */
-- (void)cache:(__weak id<PROCaching>)cache willEvictExpiredDataFromMemory:(PROCachedData *)data;
+- (void)cache:(__weak id<PROMemoryCaching>)cache willEvictExpiredDataFromMemory:(PROCachedData *)data;
 
 /**
  */
-- (void)cache:(__weak id<PROCaching>)cache didEvictExpiredDataFromMemory:(PROCachedData *)data;
+- (void)cache:(__weak id<PROMemoryCaching>)cache didEvictExpiredDataFromMemory:(PROCachedData *)data;
 
 /**
  */
-- (void)cache:(__weak id<PROCaching>)cache willEvictLRUDataFromMemory:(PROCachedData *)data;
+- (void)cache:(__weak id<PROMemoryCaching>)cache willEvictLRUDataFromMemory:(PROCachedData *)data;
 
 /**
  */
-- (void)cache:(__weak id<PROCaching>)cache didEvictLRUDataFromMemory:(PROCachedData *)data;
+- (void)cache:(__weak id<PROMemoryCaching>)cache didEvictLRUDataFromMemory:(PROCachedData *)data;
 
 @end

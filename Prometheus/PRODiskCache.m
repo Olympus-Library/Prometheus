@@ -31,16 +31,26 @@
 
 #pragma mark - Constants
 
-static NSString * const PRODiskCacheSharedQueueName = @"com.prometheus.disk";
+static NSString * const PRODiskCacheDirectoryPrefix = @"PRODiskCache";
+static NSString * const PRODiskCacheDirectoryComponentSeparator = @"-";
+static NSString * const PRODiskCacheSharedQueueName = @"com.prometheus.PRODiskCache";
 
 
 #pragma mark - PRODiskCache Class Extension
 
 @interface PRODiskCache ()
 
+@property (readonly) NSURL *cacheDirectoryURL;
 @property (readonly) dispatch_queue_t queue;
+@property (readonly) NSMutableDictionary *reads;
 
 @end
+#pragma mark - Constants
+
+typedef NS_ENUM(NSUInteger, PRODiskCacheVersion) {
+    PRODiskCacheVersionUnknown  = 0,
+    PRODiskCacheVersionOne      = 1
+};
 
 
 #pragma mark - PRODiskCache Implementation
@@ -56,9 +66,50 @@ static NSString * const PRODiskCacheSharedQueueName = @"com.prometheus.disk";
         _diskPath = diskPath;
         _diskCapacity = diskCapacity;
         _queue = [PRODiskCache sharedQueue];
+        _reads = [NSMutableDictionary new];
+        
+        PRODiskCacheVersion version = [PRODiskCache discoverLatestDiskCacheVersionAtDiskPath:diskPath];
+        if (version == PRODiskCacheVersionUnknown) {
+            // TODO: create cache directory
+        } else if (version == PRODiskCacheVersionOne) {
+            // TODO: use cache directory
+        }
     }
     return self;
 }
+
+- (void)createCacheDirectoryAtDiskPath:(NSString *)diskPath
+{
+    
+}
+
++ (PRODiskCacheVersion)discoverLatestDiskCacheVersionAtDiskPath:(NSString *)diskPath
+{
+    NSError *error;
+    NSArray *directories = [[NSFileManager defaultManager]contentsOfDirectoryAtPath:diskPath
+                                                                              error:&error];
+    PRODiskCacheVersion highestVersion = PRODiskCacheVersionUnknown;
+    if (directories) {
+        for (NSString *directory in directories) {
+            NSArray *components = [directory componentsSeparatedByString:PRODiskCacheDirectoryComponentSeparator];
+            @try {
+                // TODO: logic here needs to change if we ever add more versions
+                NSString *versionComponent = components[1];
+                PRODiskCacheVersion version = [versionComponent integerValue];
+                if (version == PRODiskCacheVersionOne) {
+                    highestVersion = version;
+                }
+            } @catch (NSException *exception) {
+                continue; // nothing to do
+            }
+        }
+    } else if (error) {
+        NSLog(@"%@", [error localizedDescription]);
+    }
+    
+    return highestVersion;
+}
+
 
 + (dispatch_queue_t)sharedQueue
 {
@@ -90,9 +141,9 @@ static NSString * const PRODiskCacheSharedQueueName = @"com.prometheus.disk";
     return nil;
 }
 
-- (void)storeCachedData:(PROCachedData *)data forKey:(NSString *)key
+- (BOOL)storeCachedData:(PROCachedData *)data forKey:(NSString *)key
 {
-    
+    return NO;
 }
 
 #pragma mark Removing Cached Objects
