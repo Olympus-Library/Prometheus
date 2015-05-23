@@ -54,7 +54,7 @@ extern const NSUInteger PROCacheSharedMemoryCapacity;
 #pragma mark - PROCache Interface
 
 /**
- The PROCache class implements the caching of generic data by mapping 
+ The PROCache class implements the caching of generic data by mapping
  PROCacheKey objects to PROCachedData objects. It provides a composite in-memory
  and on-disk cache, and lets you manipulate the sizes of both the in-memory and
  on-disk portions. You can also control the path where cache data is stored

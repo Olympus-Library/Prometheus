@@ -32,7 +32,9 @@
 #import "PRODiskCacheDelegate.h"
 
 
+#pragma mark - Constants
 
+extern NSString * const PRODiskCacheDefaultDiskPath;
 
 
 #pragma mark - PRODiskCache Interface

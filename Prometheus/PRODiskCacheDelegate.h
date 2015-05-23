@@ -69,15 +69,4 @@
  */
 - (void)cache:(__weak id<PRODiskCaching>)cache didEvictLRUDataFromDisk:(PROCachedData *)data;
 
-/**
- Determines whether the cache should use the cached data on disk for the given
- version.
- */
-- (BOOL)cache:(id<PRODiskCaching>)cache shouldUseDiskCacheVersion:(NSString *)version;
-
-/**
- Migrates the disk cache from the given version.
- */
-- (void)cache:(id<PRODiskCaching>)cache migrateFromDiskCacheVersion:(NSString *)version;
-
 @end

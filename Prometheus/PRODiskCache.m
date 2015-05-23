@@ -27,13 +27,58 @@
 #pragma mark - Imports
 
 #import "PRODiskCache.h"
+#if TARGET_OS_IPHONE
+@import UIKit;
+#endif
 
 
-#pragma mark - Constants
+#pragma mark Type Definitions
 
+typedef NS_ENUM(NSUInteger, PRODiskCacheVersion) {
+    PRODiskCacheVersionNotFound     = 0,
+    PRODiskCacheVersionOne          = 1
+};
+
+
+#pragma mark - Constants and Functions
+
+NSString * const PRODiskCacheDefaultDiskPath = @"";
 static NSString * const PRODiskCacheDirectoryPrefix = @"PRODiskCache";
 static NSString * const PRODiskCacheDirectoryComponentSeparator = @"-";
 static NSString * const PRODiskCacheSharedQueueName = @"com.prometheus.PRODiskCache";
+
+static inline PRODiskCacheVersion PRODiskCacheCurrentVersion() {
+    return PRODiskCacheVersionOne;
+}
+
+static const CFStringRef PRODiskCacheEscapeCharacters = (__bridge CFStringRef)@".:/";
+static inline NSString * PRODiskCacheDirectoryName(PRODiskCacheVersion version) {
+    return [NSString stringWithFormat:@"%@-%lu", PRODiskCacheDirectoryPrefix, version];
+}
+
+static inline NSString * encodeString(NSString *string) {
+    if (!string) {
+        return nil;
+    } else if (!string.length) {
+        return @"";
+    }
+    return CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
+                                                                     (__bridge CFStringRef)string, NULL,
+                                                                     PRODiskCacheEscapeCharacters,
+                                                                     kCFStringEncodingUTF8));
+}
+
+static inline NSString * decodeString(NSString *string) {
+    if (!string) {
+        return nil;
+    } else if (!string.length) {
+        return @"";
+    }
+    return CFBridgingRelease(CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault,
+                                                                                     (__bridge CFStringRef)string,
+                                                                                     (__bridge CFStringRef)@"",
+                                                                                     kCFStringEncodingUTF8));
+}
 
 
 #pragma mark - PRODiskCache Class Extension
@@ -42,20 +87,25 @@ static NSString * const PRODiskCacheSharedQueueName = @"com.prometheus.PRODiskCa
 
 @property (readonly) NSURL *cacheDirectoryURL;
 @property (readonly) dispatch_queue_t queue;
+@property (readonly) NSMutableDictionary *sizes;
 @property (readonly) NSMutableDictionary *reads;
 
 @end
-#pragma mark - Constants
-
-typedef NS_ENUM(NSUInteger, PRODiskCacheVersion) {
-    PRODiskCacheVersionUnknown  = 0,
-    PRODiskCacheVersionOne      = 1
-};
 
 
 #pragma mark - PRODiskCache Implementation
 
 @implementation PRODiskCache
+
++ (dispatch_queue_t)sharedQueue
+{
+    static dispatch_queue_t sharedQueue = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedQueue = dispatch_queue_create([PRODiskCacheSharedQueueName UTF8String], DISPATCH_QUEUE_SERIAL);
+    });
+    return sharedQueue;
+}
 
 #pragma mark Creating a Disk Cache
 
@@ -68,57 +118,88 @@ typedef NS_ENUM(NSUInteger, PRODiskCacheVersion) {
         _queue = [PRODiskCache sharedQueue];
         _reads = [NSMutableDictionary new];
         
-        PRODiskCacheVersion version = [PRODiskCache discoverLatestDiskCacheVersionAtDiskPath:diskPath];
-        if (version == PRODiskCacheVersionUnknown) {
-            // TODO: create cache directory
-        } else if (version == PRODiskCacheVersionOne) {
-            // TODO: use cache directory
-        }
+        __weak PRODiskCache *weak = self;
+        dispatch_async(_queue, ^{
+            PRODiskCache *strong = weak;
+            strong->_cacheDirectoryURL = [strong createDirectoryIfNecessaryAtDiskPath:diskPath];
+            if (strong.cacheDirectoryURL) {
+                [strong loadCacheState];
+            }
+        });
     }
     return self;
 }
 
-- (void)createCacheDirectoryAtDiskPath:(NSString *)diskPath
+#pragma mark Creating Key
+
+- (NSString *)keyForFileURL:(NSURL *)fileURL
 {
-    
+    return decodeString([fileURL lastPathComponent]);
 }
 
-+ (PRODiskCacheVersion)discoverLatestDiskCacheVersionAtDiskPath:(NSString *)diskPath
+- (NSURL *)fileURLForKey:(NSString *)key
 {
-    NSError *error;
-    NSArray *directories = [[NSFileManager defaultManager]contentsOfDirectoryAtPath:diskPath
-                                                                              error:&error];
-    PRODiskCacheVersion highestVersion = PRODiskCacheVersionUnknown;
-    if (directories) {
-        for (NSString *directory in directories) {
-            NSArray *components = [directory componentsSeparatedByString:PRODiskCacheDirectoryComponentSeparator];
-            @try {
-                // TODO: logic here needs to change if we ever add more versions
-                NSString *versionComponent = components[1];
-                PRODiskCacheVersion version = [versionComponent integerValue];
-                if (version == PRODiskCacheVersionOne) {
-                    highestVersion = version;
-                }
-            } @catch (NSException *exception) {
-                continue; // nothing to do
-            }
-        }
-    } else if (error) {
-        NSLog(@"%@", [error localizedDescription]);
+    return [self.cacheDirectoryURL URLByAppendingPathComponent:encodeString(key)];
+}
+
+#pragma mark Initializing State
+
+- (NSURL *)createDirectoryIfNecessaryAtDiskPath:(NSString *)diskPath
+{
+    
+    NSArray *directoryURLs = [[NSFileManager defaultManager]URLsForDirectory:NSCachesDirectory
+                                                                 inDomains:NSUserDomainMask];
+    if ([directoryURLs count] == 0){
+        return nil;
     }
     
-    return highestVersion;
+    NSError *error;
+    NSString *directoryName = PRODiskCacheDirectoryName(PRODiskCacheCurrentVersion());
+    NSURL *cacheDirectoryURL = [NSURL fileURLWithPathComponents:@[directoryURLs[0], directoryName]];
+    [[NSFileManager defaultManager]createDirectoryAtURL:cacheDirectoryURL
+                            withIntermediateDirectories:YES
+                                             attributes:nil
+                                                  error:&error];
+    if (![[NSFileManager defaultManager]fileExistsAtPath:[cacheDirectoryURL path]]) {
+        NSLog(@"%@", [error localizedDescription]);
+        return nil;
+    }
+    
+    return cacheDirectoryURL;
 }
 
-
-+ (dispatch_queue_t)sharedQueue
+- (void)loadCacheState
 {
-    static dispatch_queue_t sharedQueue = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedQueue = dispatch_queue_create([PRODiskCacheSharedQueueName UTF8String], DISPATCH_QUEUE_SERIAL);
-    });
-    return sharedQueue;
+    NSError *error;
+    NSArray *propertyKeys = @[NSURLContentModificationDateKey, NSURLTotalFileAllocatedSizeKey];
+    NSArray *fileURLs = [[NSFileManager defaultManager]contentsOfDirectoryAtURL:_cacheDirectoryURL
+                                                     includingPropertiesForKeys:propertyKeys
+                                                                        options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                          error:&error];
+    if (!fileURLs) {
+        NSLog(@"%@", [error localizedDescription]);
+        return;
+    }
+    
+    for (NSURL *fileURL in fileURLs) {
+        error = nil;
+        NSString *key = [self keyForFileURL:fileURL];
+        NSDictionary *properties = [fileURL resourceValuesForKeys:propertyKeys
+                                                            error:&error];
+        if (properties) {
+            NSDate *read = properties[NSURLContentModificationDateKey];
+            if (read && key) {
+                _reads[key] = read;
+            }
+            NSNumber *bytes = properties[NSURLTotalFileAllocatedSizeKey];
+            if (bytes && key) {
+                _sizes[key] = bytes;
+                _currentDiskUsage += bytes.unsignedIntegerValue;
+            }
+        } else {
+             NSLog(@"%@", [error localizedDescription]);
+        }
+    }
 }
 
 #pragma mark Getting and Storing Cached Objects

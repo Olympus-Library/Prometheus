@@ -38,7 +38,7 @@
 
 static const float PROMemoryCacheMaxPressureFactor                  = 0.875;
 static NSString * const PROMemoryCacheQueueNamePrefix               = @"com.prometheus.PROMemoryCache";
-static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 3 minutes
+static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 60.0;
 
 
 #pragma mark - PROMemoryCache Class Extension
@@ -168,7 +168,7 @@ static const NSTimeInterval PROMemoryCacheGarbageCollectInterval    = 180.0; // 
 
 - (void)evictExpiredCachedData:(PROCachedData *)data forKey:(NSString *)key
 {
-    __weak id<PROCaching> weak = self;
+    __weak id<PROMemoryCaching> weak = self;
     if ([_delegate conformsToProtocol:@protocol(PROMemoryCacheDelegate)] &&
         [_delegate respondsToSelector:@selector(cache:willEvictExpiredDataFromMemory:)]) {
         [_delegate cache:weak willEvictExpiredDataFromMemory:data];
