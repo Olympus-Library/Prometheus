@@ -1,6 +1,9 @@
 # Xcode
 #
+<<<<<<< HEAD
 .DS_Store
+=======
+>>>>>>> f2d66af6406554bc1bb2dfa4a21bcaf15be6de3b
 build/
 *.pbxuser
 !default.pbxuser
