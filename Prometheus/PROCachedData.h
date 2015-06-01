@@ -31,6 +31,8 @@
 
 #pragma mark - Constants
 
+/**
+ */
 extern const NSTimeInterval PROCachedDataLifetimeInfinity;
 
 

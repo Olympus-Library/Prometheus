@@ -155,15 +155,15 @@ extern const NSUInteger PROCacheSharedMemoryCapacity;
 @property (readonly) NSUInteger currentMemoryUsage;
 
 /**
- Indicates whether the cache removes all of its cached data when it receives
- a memory warning.
+ YES if the receiver should remove all cached data from it's in-memory cache in
+ the event of a memory warning.
  */
-@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnMemoryWarning;
+@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnMemoryWarning NS_AVAILABLE_IOS(4_0);
 
 /**
- Indicates whether the cache remove all of its cached data when it enters the
- background.
+ YES if the receiver should remove all cached data from it's in-memory cache
+ upon entering the background.
  */
-@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnEnteringBackground;
+@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnEnteringBackground NS_AVAILABLE_IOS(4_0);
 
 @end

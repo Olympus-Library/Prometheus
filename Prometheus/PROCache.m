@@ -109,9 +109,9 @@ const NSUInteger PROCacheSharedMemoryCapacity   = 4000000;  // 4MiB
     return nil;
 }
 
-- (void)storeCachedData:(PROCachedData *)data forKey:(NSString *)key
+- (BOOL)storeCachedData:(PROCachedData *)data forKey:(NSString *)key
 {
-    
+    return NO;
 }
 
 #pragma mark Removing Cached Objects
@@ -139,10 +139,12 @@ const NSUInteger PROCacheSharedMemoryCapacity   = 4000000;  // 4MiB
 
 #pragma mark Setters
 
+#if TARGET_OS_IPHONE
 - (void)setRemovesAllCachedDataOnMemoryWarning:(BOOL)removesAllCachedDataOnMemoryWarning
 {
     self.memoryCache.removesAllCachedDataOnMemoryWarning = removesAllCachedDataOnMemoryWarning;
 }
+#endif
 
 #pragma mark Getters
 

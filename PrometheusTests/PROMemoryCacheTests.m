@@ -27,8 +27,9 @@
 #pragma mark - Imports
 
 @import XCTest;
-#import "PROMemoryCache.h"
-#import "PROCachedData.h"
+
+#import "Prometheus.h"
+#import "PrometheusInternal.h"
 
 
 #pragma mark - Constants and Functions
@@ -43,9 +44,9 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
 
 @interface PROMemoryCache (Private)
 
-@property (readonly) dispatch_queue_t       queue;
 @property (readonly) NSMutableDictionary    *reads;
 @property (readonly) NSMutableDictionary    *cache;
+@property (assign) NSUInteger currentMemoryUsage;
 
 @end
 
@@ -66,8 +67,10 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
     XCTAssertEqual(1000, cache.memoryCapacity);
     XCTAssertEqual(0, cache.currentMemoryUsage);
+#if TARGET_OS_IPHONE
     XCTAssertEqual(YES, cache.removesAllCachedDataOnMemoryWarning);
     XCTAssertEqual(YES, cache.removesAllCachedDataOnEnteringBackground);
+#endif
 }
 
 #pragma mark Asynchronous Test
@@ -76,7 +79,7 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
 {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
     PROCachedData *expected = [self randomCachedDataWithLifetime:10];
-    [cache storeCachedData:expected forKey:@"test"];
+    cache.cache[@"test"] = expected;
     
     __block PROCachedData *actual = nil;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
@@ -142,36 +145,33 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
 - (void)testRemoveAllCachedDataWithCompletion
 {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:256000];
-    NSMutableArray *keys = [NSMutableArray new];
     for (int i = 0; i < 1000; ++i) {
         NSString *key = [NSString stringWithFormat:@"test%d", i];
         PROCachedData *data = [self randomCachedDataWithLifetime:60];
-        [cache storeCachedData:data forKey:key];
-        [keys addObject:key];
+        cache.cache[key] = data;
+        cache.reads[key] = [NSDate date];
     }
+    cache.currentMemoryUsage = 256000;
     
-    __block id<PROCaching> actualCache = nil;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     [cache removeAllCachedDataWithCompletion:^(id<PROCaching> cache, BOOL success) {
-        actualCache = cache;
         dispatch_semaphore_signal(semaphore);
     }];
     
     dispatch_semaphore_wait(semaphore, timeout(DefaultAsyncTestTimeout));
     
-    XCTAssertEqual(cache, actualCache);
     XCTAssertEqual(0, cache.currentMemoryUsage);
-    for (NSString *key in keys) {
-        XCTAssertNil(cache.cache[key]);
-        XCTAssertNil(cache.reads[key]);
-    }
+    XCTAssertEqual(0, [cache.reads count]);
+    XCTAssertEqual(0, [cache.cache count]);
 }
 
 - (void)testRemoveCachedDataForKeyCompletion
 {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
     PROCachedData *data = [self randomCachedDataWithLifetime:10];
-    [cache storeCachedData:data forKey:@"test"];
+    cache.cache[@"test"] = data;
+    cache.reads[@"test"] = [NSDate date];
+    cache.currentMemoryUsage = data.size;
     
     __block NSString *actualKey = nil;
     __block PROCachedData *actualData = nil;
@@ -195,7 +195,7 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
 {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
     PROCachedData *expected = [self randomCachedDataWithLifetime:10];
-    [cache storeCachedData:expected forKey:@"test"];
+    cache.cache[@"test"] = expected;
     
     PROCachedData *actual = [cache cachedDataForKey:@"test"];
     
@@ -210,9 +210,8 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     
     [cache storeCachedData:expected forKey:@"test"];
     
-    PROCachedData *actual = [cache.cache objectForKey:@"test"];
     XCTAssertEqual(expected.size, cache.currentMemoryUsage);
-    XCTAssertEqualObjects(expected, actual);
+    XCTAssertEqualObjects(expected, cache.cache[@"test"]);
     XCTAssertNotNil(cache.reads[@"test"]);
 }
 
@@ -233,34 +232,60 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
 - (void)testRemoveAllCachedData
 {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:256000];
-    NSMutableArray *keys = [NSMutableArray new];
     for (int i = 0; i < 1000; ++i) {
-        NSString *key = [NSString stringWithFormat:@"test%d", i];
         PROCachedData *data = [self randomCachedDataWithLifetime:60];
-        [cache storeCachedData:data forKey:key];
-        [keys addObject:key];
+        NSString *key = [NSString stringWithFormat:@"test%d", i];
+        cache.reads[key] = [NSDate date];
+        cache.cache[key] = data;
     }
     
     [cache removeAllCachedData];
     
     XCTAssertEqual(0, cache.currentMemoryUsage);
-    for (NSString *key in keys) {
-        XCTAssertNil(cache.cache[key]);
-        XCTAssertNil(cache.reads[key]);
-    }
+    XCTAssertEqual(0, [cache.reads count]);
+    XCTAssertEqual(0, [cache.cache count]);
 }
 
 - (void)testRemoveCachedDataForKey
 {
     PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
-    PROCachedData *expected = [self randomCachedDataWithLifetime:10];
-    [cache storeCachedData:expected forKey:@"test"];
+    PROCachedData *data = [self randomCachedDataWithLifetime:10];
+    cache.currentMemoryUsage = data.size;
+    cache.reads[@"test"] = [NSDate date];
+    cache.cache[@"test"] = data;
     
     [cache removeCachedDataForKey:@"test"];
     
     XCTAssertNil(cache.cache[@"test"]);
     XCTAssertNil(cache.reads[@"test"]);
     XCTAssertEqual(0, cache.currentMemoryUsage);
+}
+
+#pragma mark Garbage Collect Tests
+
+- (void)testGarbageCollectsExpired
+{
+    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
+    PROCachedData *data = [self randomCachedDataWithLifetime:1];
+    [cache storeCachedData:data forKey:@"test"];
+    XCTAssertNotNil(cache.cache[@"test"]);
+    while ([data.expiration timeIntervalSinceNow]) {} // spin and wait
+    [cache garbageCollectWithDate:[NSDate date]];
+    XCTAssertNil([cache cachedDataForKey:@"test"]);
+}
+
+- (void)testGarbageCollectsLRU
+{
+    PROMemoryCache *cache = [[PROMemoryCache alloc]initWithMemoryCapacity:1000];
+    cache.cache[@"test1"] = [self randomCachedDataWithLifetime:10];
+    cache.cache[@"test2"] = [self randomCachedDataWithLifetime:10];
+    cache.reads[@"test1"] = [[NSDate date]dateByAddingTimeInterval:-100];
+    cache.reads[@"test2"] = [NSDate date];
+    cache.currentMemoryUsage = 1000;
+    [cache garbageCollectWithDate:[NSDate date]];
+    
+    XCTAssertNil([cache cachedDataForKey:@"test1"]);
+    XCTAssertNotNil([cache cachedDataForKey:@"test2"]);
 }
 
 #pragma mark Deadlock Tests
@@ -276,7 +301,7 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
     
     int numFetches = 10000;
     __block NSUInteger completedFetches = 0;
-    NSLock *fetchLock = [NSLock new];
+    NSLock *lock = [NSLock new];
     dispatch_group_t group = dispatch_group_create();
     for (int i = 0; i < numFetches; ++i) {
         dispatch_group_async(group, queue, ^{
@@ -290,9 +315,9 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
                          completion:^(__weak id<PROCaching> cache, NSString *key, PROCachedData *data) {
                              [cache storeCachedData:data forKey:key];
             }];
-            [fetchLock lock];
+            [lock lock];
             completedFetches++;
-            [fetchLock unlock];
+            [lock unlock];
         });
     }
     
@@ -302,13 +327,18 @@ static inline dispatch_time_t timeout(NSTimeInterval seconds) {
 
 #pragma mark Helper
 
-- (PROCachedData *)randomCachedDataWithLifetime:(NSTimeInterval)lifetime
+- (PROCachedData *)cachedDataWithLifetime:(NSTimeInterval)lifetime length:(NSUInteger)length
 {
-    NSUInteger length = arc4random() % 256;
     // this is pretty sketchy, only use for testing!
     NSMutableData *data = [NSMutableData dataWithBytes:malloc(length)
                                                 length:length];
     return [PROCachedData cachedDataWithData:data lifetime:lifetime];
+}
+
+- (PROCachedData *)randomCachedDataWithLifetime:(NSTimeInterval)lifetime
+{
+    NSUInteger length = arc4random() % 256;
+    return [self cachedDataWithLifetime:lifetime length:length];
 }
 
 @end

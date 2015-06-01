@@ -27,6 +27,8 @@
 #pragma mark - Imports
 
 #import "PRODiskCache.h"
+#import "PrometheusInternal.h"
+
 #if TARGET_OS_IPHONE
 @import UIKit;
 #endif
@@ -42,10 +44,14 @@ typedef NS_ENUM(NSUInteger, PRODiskCacheVersion) {
 
 #pragma mark - Constants and Functions
 
+static const float PROMaxPressureFactor                 = 0.875;
+static const NSTimeInterval PROGarbageCollectInterval   = 180.0;
+
 NSString * const PRODiskCacheDefaultDiskPath = @"";
 static NSString * const PRODiskCacheDirectoryPrefix = @"PRODiskCache";
 static NSString * const PRODiskCacheDirectoryComponentSeparator = @"-";
-static NSString * const PRODiskCacheSharedQueueName = @"com.prometheus.PRODiskCache";
+static NSString * const PRODiskCacheSharedQueueName = @"com.prometheus.PRODiskCache.cache";
+static NSString * const PRODiskCacheSharedGCQueueName = @"com.prometheus.PRODiskCache.gc";
 
 static inline PRODiskCacheVersion PRODiskCacheCurrentVersion() {
     return PRODiskCacheVersionOne;
@@ -85,10 +91,15 @@ static inline NSString * decodeString(NSString *string) {
 
 @interface PRODiskCache ()
 
-@property (readonly) NSURL *cacheDirectoryURL;
-@property (readonly) dispatch_queue_t queue;
-@property (readonly) NSMutableDictionary *sizes;
-@property (readonly) NSMutableDictionary *reads;
+@property (NS_NONATOMIC_IOSONLY) NSURL *cacheDirectoryURL;
+@property (NS_NONATOMIC_IOSONLY) dispatch_queue_t queue;
+@property (NS_NONATOMIC_IOSONLY) dispatch_semaphore_t semaphore;
+@property (NS_NONATOMIC_IOSONLY) NSMutableDictionary *sizes;
+@property (NS_NONATOMIC_IOSONLY) NSMutableDictionary *reads;
+@property (NS_NONATOMIC_IOSONLY) NSString *diskPath;
+@property (assign) NSUInteger maxMemoryPressure;
+@property (assign) NSUInteger currentDiskUsage;
+@property (assign) NSUInteger diskCapacity;
 
 @end
 
@@ -107,23 +118,34 @@ static inline NSString * decodeString(NSString *string) {
     return sharedQueue;
 }
 
++ (dispatch_queue_t)sharedGCQueue
+{
+    static dispatch_queue_t sharedQueue = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedQueue = dispatch_queue_create([PRODiskCacheSharedGCQueueName UTF8String], DISPATCH_QUEUE_SERIAL);
+    });
+    return sharedQueue;
+}
+
 #pragma mark Creating a Disk Cache
 
 - (instancetype)initWithDiskCapacity:(NSUInteger)diskCapacity
                             diskPath:(NSString *)diskPath
 {
     if (self = [super init]) {
-        _diskPath = diskPath;
-        _diskCapacity = diskCapacity;
-        _queue = [PRODiskCache sharedQueue];
-        _reads = [NSMutableDictionary new];
+        self.diskPath = diskPath;
+        self.diskCapacity = diskCapacity;
+        self.reads = [NSMutableDictionary new];
+        self.queue = [PRODiskCache sharedQueue];
+        self.maxMemoryPressure = PROMaxPressureFactor * self.diskCapacity;
         
         __weak PRODiskCache *weak = self;
-        dispatch_async(_queue, ^{
+        dispatch_async([PRODiskCache sharedQueue], ^{
             PRODiskCache *strong = weak;
-            strong->_cacheDirectoryURL = [strong createDirectoryIfNecessaryAtDiskPath:diskPath];
+            strong.cacheDirectoryURL = [strong createDirectory:diskPath];
             if (strong.cacheDirectoryURL) {
-                [strong loadCacheState];
+                [strong load];
             }
         });
     }
@@ -144,11 +166,11 @@ static inline NSString * decodeString(NSString *string) {
 
 #pragma mark Initializing State
 
-- (NSURL *)createDirectoryIfNecessaryAtDiskPath:(NSString *)diskPath
+- (NSURL *)createDirectory:(NSString *)diskPath
 {
     
     NSArray *directoryURLs = [[NSFileManager defaultManager]URLsForDirectory:NSCachesDirectory
-                                                                 inDomains:NSUserDomainMask];
+                                                                   inDomains:NSUserDomainMask];
     if ([directoryURLs count] == 0){
         return nil;
     }
@@ -168,7 +190,7 @@ static inline NSString * decodeString(NSString *string) {
     return cacheDirectoryURL;
 }
 
-- (void)loadCacheState
+- (void)load
 {
     NSError *error;
     NSArray *propertyKeys = @[NSURLContentModificationDateKey, NSURLTotalFileAllocatedSizeKey];
@@ -189,15 +211,54 @@ static inline NSString * decodeString(NSString *string) {
         if (properties) {
             NSDate *read = properties[NSURLContentModificationDateKey];
             if (read && key) {
-                _reads[key] = read;
+                self.reads[key] = read;
             }
             NSNumber *bytes = properties[NSURLTotalFileAllocatedSizeKey];
             if (bytes && key) {
-                _sizes[key] = bytes;
-                _currentDiskUsage += bytes.unsignedIntegerValue;
+                self.sizes[key] = bytes;
+                self.currentDiskUsage += bytes.unsignedIntegerValue;
             }
         } else {
              NSLog(@"%@", [error localizedDescription]);
+        }
+    }
+}
+
+#pragma mark Garbage Collection
+
+- (void)garbageCollect
+{
+    NSDate *date = [NSDate date];
+    
+    __weak PRODiskCache *weak = self;
+    dispatch_async(self.queue, ^{
+        PRODiskCache *strong = weak;
+        [strong garbageCollectWithDate:date];
+    });
+}
+
+- (void)garbageCollectWithDate:(NSDate *)date
+{
+    
+}
+
+#pragma mark Updating File State
+
+- (void)setReadDate:(NSDate *)date forURL:(NSURL *)fileURL
+{
+    if (!date || fileURL) {
+        return;
+    }
+    
+    BOOL success = [[NSFileManager defaultManager]setAttributes:@{ NSFileModificationDate : date }
+                                                   ofItemAtPath:[fileURL path]
+                                                          error:nil];
+    if (success) {
+        NSString *key = [self keyForFileURL:fileURL];
+        if (key) {
+            [self lock:^{
+                self.reads[key] = date;
+            }];
         }
     }
 }
@@ -207,23 +268,99 @@ static inline NSString * decodeString(NSString *string) {
 - (void)cachedDataForKey:(NSString *)key
               completion:(PROCacheReadWriteCompletion)completion
 {
+    key = [key copy];
     
+    __weak PRODiskCache *weak = self;
+    
+    if (!completion) {
+        return;
+    } else if (!key) {
+        completion(weak, key, nil);
+        return;
+    }
+    
+    dispatch_async(self.queue, ^{
+        PRODiskCache *strong = weak;
+        PROCachedData *data = [strong cachedDataForKey:key];
+        completion(weak, key, data);
+    });
 }
 
 - (void)storeCachedData:(PROCachedData *)data
                  forKey:(NSString *)key
              completion:(PROCacheReadWriteCompletion)completion
 {
+    key = [key copy];
     
+    __weak PRODiskCache *weak = self;
+    
+    if (!key) {
+        if (completion) {
+            completion(weak, key, nil);
+        }
+        return;
+    }
+    
+    dispatch_async(self.queue, ^{
+        PRODiskCache *strong = weak;
+        BOOL success = [strong storeCachedData:data forKey:key];
+        completion(weak, key, success ? data : nil);
+    });
 }
 
 - (PROCachedData *)cachedDataForKey:(NSString *)key
 {
+    if (!key) {
+        return nil;
+    }
+    
+    NSDate *date = [NSDate date];
+    
+    NSURL *fileURL = [self fileURLForKey:key];
+    if ([[NSFileManager defaultManager]fileExistsAtPath:[fileURL path]]) {
+        @try {
+            PROCachedData *data = [NSKeyedUnarchiver unarchiveObjectWithFile:fileURL.path];
+            [self setReadDate:date forURL:fileURL];
+            return data;
+        }
+        @catch (NSException *exception) {
+            [[NSFileManager defaultManager]removeItemAtURL:fileURL error:nil];
+        }
+    }
     return nil;
 }
 
 - (BOOL)storeCachedData:(PROCachedData *)data forKey:(NSString *)key
 {
+    key = [key copy];
+    
+    if (!key || !data) {
+        return NO;
+    }
+    
+    NSDate *date = [NSDate date];
+    
+    NSURL *fileURL = [self fileURLForKey:key];
+    
+    BOOL success = [NSKeyedArchiver archiveRootObject:data toFile:fileURL.path];
+    if (success) {
+        [self setReadDate:date forURL:fileURL];
+        
+        NSDictionary *values = [fileURL resourceValuesForKeys:@[ NSURLTotalFileAllocatedSizeKey ] error:nil];
+        NSNumber *size = values[NSURLTotalFileAllocatedSizeKey];
+        if (size) {
+            NSNumber *previous = self.sizes[key];
+            self.currentDiskUsage -= [previous unsignedIntegerValue];
+            
+            self.sizes[key] = size;
+            self.currentDiskUsage += [size unsignedIntegerValue];
+        }
+        
+        if (self.currentDiskUsage >= self.maxMemoryPressure) {
+            [self garbageCollect];
+        }
+    }
+    
     return NO;
 }
 
@@ -249,6 +386,19 @@ static inline NSString * decodeString(NSString *string) {
 - (void)removeCachedDataForKey:(NSString *)key
 {
     
+}
+
+#pragma mark Locking
+
+- (void)lock:(void (^)(void))block
+{
+    if (!block) {
+        return;
+    }
+    
+    dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);
+    block();
+    dispatch_semaphore_signal(self.semaphore);
 }
 
 @end

@@ -1,5 +1,5 @@
 //
-//  PROMemoryCache.h
+//  PROMemoryCache+Internal.h
 //  Prometheus
 //
 //  Copyright (c) 2015 Comyar Zaheri. All rights reserved.
@@ -26,61 +26,64 @@
 
 #pragma mark - Imports
 
-@import Foundation;
-
-#import "PROCaching.h"
-#import "PROMemoryCaching.h"
-#import "PROMemoryCacheDelegate.h"
+#import "PROMemoryCache.h"
 
 
-#pragma mark - PROMemoryCache Interface
+#pragma mark - PROMemoryCache Internal Category Interface
 
 /**
+ @warning Not for extenal use.
  */
-@interface PROMemoryCache : NSObject <PROCaching, PROMemoryCaching>
-
-- (instancetype)init NS_UNAVAILABLE;
+@interface PROMemoryCache (Internal)
 
 // -----
-// @name Creating a Memory Cache
+// @name Internal
 // -----
 
-#pragma mark Creating a Memory Cache
+#pragma mark Internal
 
 /**
+ @warning Not for extenal use.
  */
-- (instancetype)initWithMemoryCapacity:(NSUInteger)memoryCapacity NS_DESIGNATED_INITIALIZER;
-
-// -----
-// @name Properties
-// -----
-
-#pragma mark Properties
+- (void)didReceiveMemoryWarningNotification;
 
 /**
+ @warning Not for extenal use.
  */
-@property (weak, NS_NONATOMIC_IOSONLY) id<PROMemoryCacheDelegate> delegate;
+- (void)didEnterBackgroundNotification;
 
 /**
- The capacity of the receiver's in-memory cache, in bytes.
+ @warning Not for extenal use.
  */
-@property (readonly) NSUInteger memoryCapacity;
+- (void)garbageCollect;
 
 /**
- The current size of the receiver's in-memory cache, in bytes.
+ @warning Not for extenal use.
  */
-@property (readonly) NSUInteger currentMemoryUsage;
+- (void)garbageCollectWithDate:(NSDate *)date;
 
 /**
- YES if the receiver should remove all cached data from it's in-memory cache in
- the event of a memory warning.
+ @warning Not for extenal use.
  */
-@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnMemoryWarning NS_AVAILABLE_IOS(4_0);
+- (BOOL)shouldEvictLRUCachedData:(PROCachedData *)data
+                          forKey:(NSString *)key;
 
 /**
- YES if the receiver should remove all cached data from it's in-memory cache
- upon entering the background.
+ @warning Not for extenal use.
  */
-@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnEnteringBackground NS_AVAILABLE_IOS(4_0);
+- (void)evictLRUCachedData:(PROCachedData *)data
+                    forKey:(NSString *)key;
+
+/**
+ @warning Not for extenal use.
+ */
+- (BOOL)shouldEvictExpiredCachedData:(PROCachedData *)data
+                              forKey:(NSString *)key;
+
+/**
+ @warning Not for extenal use.
+ */
+- (void)evictExpiredCachedData:(PROCachedData *)data
+                        forKey:(NSString *)key;
 
 @end

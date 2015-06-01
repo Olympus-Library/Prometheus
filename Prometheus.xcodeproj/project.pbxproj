@@ -7,9 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		370027615D6953C8795E7A8F /* libPods-Prometheus iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 71B6A2B93DDB81CE7E986307 /* libPods-Prometheus iOS.a */; };
-		A6EAEDA10F781A2BF517918E /* libPods-Prometheus OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 218DC49EFA50AB9368A83606 /* libPods-Prometheus OSX.a */; };
-		D6BF0C23A2B39BF9A42E8705 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F57839E843AB2E0F32878058 /* libPods.a */; };
+		06FCAC2A141FBB968997391C /* libPods-Prometheus iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 71B6A2B93DDB81CE7E986307 /* libPods-Prometheus iOS.a */; };
+		51A0D7C14B2D8FA759E00A5B /* libPods-Prometheus OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 218DC49EFA50AB9368A83606 /* libPods-Prometheus OSX.a */; };
 		DD9ED4D91AD11E200068D45E /* Prometheus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD9ED4CE1AD11E200068D45E /* Prometheus.framework */; };
 		DD9ED4EA1AD11E870068D45E /* PROCachedDataTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDC68D0F1AC7478A005627D6 /* PROCachedDataTests.m */; };
 		DD9ED4EB1AD11E870068D45E /* PROMemoryCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDEB44541AC7F1C700791ADB /* PROMemoryCacheTests.m */; };
@@ -45,8 +44,12 @@
 		DDC68D0C1AC74778005627D6 /* PRODiskCache.m in Sources */ = {isa = PBXBuildFile; fileRef = DDC68CFE1AC74778005627D6 /* PRODiskCache.m */; };
 		DDC68D0D1AC74778005627D6 /* PROMemoryCache.h in Headers */ = {isa = PBXBuildFile; fileRef = DDC68CFF1AC74778005627D6 /* PROMemoryCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DDC68D0E1AC74778005627D6 /* PROMemoryCache.m in Sources */ = {isa = PBXBuildFile; fileRef = DDC68D001AC74778005627D6 /* PROMemoryCache.m */; };
-		DDC68D111AC7478A005627D6 /* PROCachedDataTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDC68D0F1AC7478A005627D6 /* PROCachedDataTests.m */; };
-		DDEB44551AC7F1C700791ADB /* PROMemoryCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDEB44541AC7F1C700791ADB /* PROMemoryCacheTests.m */; };
+		DDE06E981B1BA7D9009EEE4A /* PROMemoryCache+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = DDE06E971B1BA7D9009EEE4A /* PROMemoryCache+Internal.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		DDE06E991B1BA7D9009EEE4A /* PROMemoryCache+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = DDE06E971B1BA7D9009EEE4A /* PROMemoryCache+Internal.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		DDE06E9B1B1BB248009EEE4A /* PrometheusInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = DDE06E9A1B1BB248009EEE4A /* PrometheusInternal.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		DDE06E9C1B1BB248009EEE4A /* PrometheusInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = DDE06E9A1B1BB248009EEE4A /* PrometheusInternal.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		DDE06E9E1B1BBC8A009EEE4A /* PROMemoryCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDEB44541AC7F1C700791ADB /* PROMemoryCacheTests.m */; };
+		DDE06E9F1B1BBC95009EEE4A /* PROCachedDataTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDC68D0F1AC7478A005627D6 /* PROCachedDataTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -117,6 +120,8 @@
 		DDC68D001AC74778005627D6 /* PROMemoryCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PROMemoryCache.m; sourceTree = "<group>"; };
 		DDC68D0F1AC7478A005627D6 /* PROCachedDataTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PROCachedDataTests.m; sourceTree = "<group>"; };
 		DDC68D151AC74F8D005627D6 /* PROCacheDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PROCacheDelegate.h; sourceTree = "<group>"; };
+		DDE06E971B1BA7D9009EEE4A /* PROMemoryCache+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "PROMemoryCache+Internal.h"; sourceTree = "<group>"; };
+		DDE06E9A1B1BB248009EEE4A /* PrometheusInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrometheusInternal.h; sourceTree = "<group>"; };
 		DDEB44541AC7F1C700791ADB /* PROMemoryCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PROMemoryCacheTests.m; sourceTree = "<group>"; };
 		DDEB44561AC815F500791ADB /* PROMemoryCacheDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PROMemoryCacheDelegate.h; sourceTree = "<group>"; };
 		DDEB44571AC8163600791ADB /* PRODiskCacheDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PRODiskCacheDelegate.h; sourceTree = "<group>"; };
@@ -129,7 +134,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A6EAEDA10F781A2BF517918E /* libPods-Prometheus OSX.a in Frameworks */,
+				51A0D7C14B2D8FA759E00A5B /* libPods-Prometheus OSX.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -145,8 +150,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D6BF0C23A2B39BF9A42E8705 /* libPods.a in Frameworks */,
-				370027615D6953C8795E7A8F /* libPods-Prometheus iOS.a in Frameworks */,
+				06FCAC2A141FBB968997391C /* libPods-Prometheus iOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -211,6 +215,7 @@
 				DDC68CFA1AC74778005627D6 /* Prometheus.h */,
 				DDC68D141AC7479B005627D6 /* Protocols */,
 				DDC68D131AC74796005627D6 /* Classes */,
+				DDE06E961B1BA7BB009EEE4A /* Internal */,
 				DDC68CDA1AC7475C005627D6 /* Supporting Files */,
 			);
 			path = Prometheus;
@@ -270,6 +275,23 @@
 			name = Protocols;
 			sourceTree = "<group>";
 		};
+		DDE06E961B1BA7BB009EEE4A /* Internal */ = {
+			isa = PBXGroup;
+			children = (
+				DDE06E9A1B1BB248009EEE4A /* PrometheusInternal.h */,
+				DDE06E9D1B1BB24D009EEE4A /* Categories */,
+			);
+			name = Internal;
+			sourceTree = "<group>";
+		};
+		DDE06E9D1B1BB24D009EEE4A /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				DDE06E971B1BA7D9009EEE4A /* PROMemoryCache+Internal.h */,
+			);
+			name = Categories;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -286,7 +308,9 @@
 				DD9ED4F61AD11EC40068D45E /* PROMemoryCacheDelegate.h in Headers */,
 				DD9ED4F71AD11EC40068D45E /* PROCache.h in Headers */,
 				DD9ED4F81AD11EC40068D45E /* PRODiskCache.h in Headers */,
+				DDE06E9C1B1BB248009EEE4A /* PrometheusInternal.h in Headers */,
 				DD9ED4F91AD11EC40068D45E /* PROMemoryCache.h in Headers */,
+				DDE06E991B1BA7D9009EEE4A /* PROMemoryCache+Internal.h in Headers */,
 				DD9ED4FA1AD11EC40068D45E /* PROCachedData.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -304,7 +328,9 @@
 				DDC68D011AC74778005627D6 /* PROCaching.h in Headers */,
 				DDC68D0B1AC74778005627D6 /* PRODiskCache.h in Headers */,
 				DD9ED4FB1AD11ED10068D45E /* PROCacheDelegate.h in Headers */,
+				DDE06E981B1BA7D9009EEE4A /* PROMemoryCache+Internal.h in Headers */,
 				DD9ED4FC1AD11ED10068D45E /* PRODiskCacheDelegate.h in Headers */,
+				DDE06E9B1B1BB248009EEE4A /* PrometheusInternal.h in Headers */,
 				DD9ED4FD1AD11ED10068D45E /* PROMemoryCacheDelegate.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -563,8 +589,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DDEB44551AC7F1C700791ADB /* PROMemoryCacheTests.m in Sources */,
-				DDC68D111AC7478A005627D6 /* PROCachedDataTests.m in Sources */,
+				DDE06E9F1B1BBC95009EEE4A /* PROCachedDataTests.m in Sources */,
+				DDE06E9E1B1BBC8A009EEE4A /* PROMemoryCacheTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -589,6 +615,7 @@
 			baseConfigurationReference = EB5D6ED2B23D0DB58570D36F /* Pods-Prometheus OSX.debug.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -602,7 +629,7 @@
 				INFOPLIST_FILE = Prometheus/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = Prometheus;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -614,6 +641,7 @@
 			baseConfigurationReference = 083E1BD9F59BC7E497A224D0 /* Pods-Prometheus OSX.release.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
@@ -624,7 +652,7 @@
 				INFOPLIST_FILE = Prometheus/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = Prometheus;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -634,7 +662,7 @@
 		DD9ED4E51AD11E200068D45E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
@@ -655,7 +683,7 @@
 		DD9ED4E61AD11E200068D45E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -687,8 +715,8 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -706,8 +734,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LIBRARY_SEARCH_PATHS = "";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -734,8 +763,8 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -747,8 +776,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LIBRARY_SEARCH_PATHS = "";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -763,6 +793,7 @@
 			baseConfigurationReference = 805DE1A96076771163A5FAAC /* Pods-Prometheus iOS.debug.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -782,6 +813,7 @@
 			baseConfigurationReference = 784825704C5BCCBE5B711B09 /* Pods-Prometheus iOS.release.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -799,6 +831,7 @@
 		DDC68CF11AC7475C005627D6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -816,6 +849,7 @@
 		DDC68CF21AC7475C005627D6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",

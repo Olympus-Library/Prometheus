@@ -1,5 +1,5 @@
 //
-//  PROMemoryCaching.h
+//  PrometheusInternal.h
 //  Prometheus
 //
 //  Copyright (c) 2015 Comyar Zaheri. All rights reserved.
@@ -26,43 +26,4 @@
 
 #pragma mark - Imports
 
-@import Foundation;
-#import "PROCaching.h"
-
-
-#pragma mark - PROMemoryCaching Protocol
-
-/**
- */
-NS_PROTOCOL_REQUIRES_EXPLICIT_IMPLEMENTATION
-@protocol PROMemoryCaching <NSObject, PROCaching>
-
-// -----
-// @name Properties
-// -----
-
-#pragma mark Properties
-
-/**
- The capacity of the receiver's in-memory cache, in bytes.
- */
-@property (readonly) NSUInteger memoryCapacity;
-
-/**
- The current size of the receiver's in-memory cache, in bytes.
- */
-@property (readonly) NSUInteger currentMemoryUsage;
-
-/**
- YES if the receiver should remove all cached data from it's in-memory cache in
- the event of a memory warning.
- */
-@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnMemoryWarning NS_AVAILABLE_IOS(4_0);
-
-/**
- YES if the receiver should remove all cached data from it's in-memory cache 
- upon entering the background.
- */
-@property (assign, NS_NONATOMIC_IOSONLY) BOOL removesAllCachedDataOnEnteringBackground NS_AVAILABLE_IOS(4_0);
-
-@end
+#import "PROMemoryCache+Internal.h"
